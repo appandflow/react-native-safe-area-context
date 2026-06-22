@@ -8,8 +8,8 @@ buildscript {
 
     dependencies {
         classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version")
-        classpath("com.android.tools.build:gradle:7.3.1")
-        classpath("com.diffplug.spotless:spotless-plugin-gradle:6.11.0")
+        classpath("com.android.tools.build:gradle:9.2.1")
+        classpath("com.diffplug.spotless:spotless-plugin-gradle:8.1.0")
     }
 }
 
@@ -32,7 +32,23 @@ def isNewArchitectureEnabled() {
 }
 
 apply plugin: 'com.android.library'
-apply plugin: 'kotlin-android'
+
+
+def shouldEnableAgpFallback() {
+    def agpMajorVersion = com.android.Version.ANDROID_GRADLE_PLUGIN_VERSION.tokenize('.')[0].toInteger()
+    if (agpMajorVersion <= 8) {
+        return true
+    }
+
+    def propertyVal = providers.gradleProperty("android.builtInKotlin").orNull
+    def isBuiltInKotlinEnabled = propertyVal != null ? propertyVal.toBoolean() : true
+
+    return !isBuiltInKotlinEnabled
+}
+
+if (shouldEnableAgpFallback()) {
+    apply plugin: 'kotlin-android'
+}
 
 if (isNewArchitectureEnabled()) {
     apply plugin: "com.facebook.react"
@@ -82,17 +98,11 @@ android {
         exclude "**/libreact_render*.so"
     }
     sourceSets.main {
-        java {
-            if (isNewArchitectureEnabled()) {
-                srcDirs += [
-                    "src/fabric/java",
-                    "${project.buildDir}/generated/source/codegen/java"
-                ]
-            } else {
-                srcDirs += [
-                    "src/paper/java"
-                ]
-            }
+        if (isNewArchitectureEnabled()) {
+            java.directories.add("${project.buildDir}/generated/source/codegen/java") // contains only java files
+            kotlin.directories.add("src/fabric/java") // contains only kotlin files
+        } else {
+            kotlin.directories.add("src/paper/java") // contains both java and kotlin files
         }
     }
 }
