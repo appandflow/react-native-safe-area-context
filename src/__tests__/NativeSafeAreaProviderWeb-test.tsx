@@ -216,6 +216,26 @@ describe('NativeSafeAreaProvider.web', () => {
     });
   });
 
+  it('updates metrics when an ancestor scroll moves the provider element', () => {
+    rectMock.mockReturnValue(makeRect(0, 100, 200, 300));
+    const onInsetsChange = jest.fn<InsetChangeNativeCallback>();
+    mountProvider(onInsetsChange);
+    // Position-only change, the element moves up by 80px without resizing.
+    rectMock.mockReturnValue(makeRect(0, 20, 200, 300));
+    act(() => {
+      document.dispatchEvent(new Event('scroll'));
+    });
+    expect(lastMetrics(onInsetsChange)).toEqual({
+      insets: {
+        top: WINDOW_INSETS.top - 20,
+        bottom: 0,
+        left: WINDOW_INSETS.left,
+        right: 0,
+      },
+      frame: { x: 0, y: 20, width: 200, height: 300 },
+    });
+  });
+
   it('falls back to window metrics when ResizeObserver is not available', () => {
     delete (globalThis as { ResizeObserver?: unknown }).ResizeObserver;
     rectMock.mockReturnValue(makeRect(20, 30, 200, 300));

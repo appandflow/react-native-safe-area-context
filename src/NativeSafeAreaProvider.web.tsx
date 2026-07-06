@@ -88,16 +88,20 @@ export function NativeSafeAreaProvider({
 
     let resizeObserver: ResizeObserver | null = null;
     if (canMeasureProviderElement) {
-      // Note this only observes size changes, position-only changes of the
-      // provider element do not trigger an update.
       resizeObserver = new ResizeObserver(onEnd);
       resizeObserver.observe(providerElement);
+      // Capture-phase listener so scrolling any ancestor re-measures the
+      // provider element position.
+      window.addEventListener('scroll', onEnd, true);
     }
 
     return () => {
       document.body.removeChild(element);
       element.removeEventListener(getSupportedTransitionEvent(), onEnd);
-      resizeObserver?.disconnect();
+      if (resizeObserver != null) {
+        resizeObserver.disconnect();
+        window.removeEventListener('scroll', onEnd, true);
+      }
     };
   }, [onInsetsChange]);
 
