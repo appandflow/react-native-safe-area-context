@@ -21,7 +21,8 @@ class SafeAreaProviderManager :
 
   override fun getExportedCustomDirectEventTypeConstants() =
       mutableMapOf(
-          InsetsChangeEvent.EVENT_NAME to mutableMapOf("registrationName" to "onInsetsChange"))
+          InsetsChangeEvent.EVENT_NAME to mutableMapOf("registrationName" to "onInsetsChange")
+      )
 
   override fun addEventEmitters(reactContext: ThemedReactContext, view: SafeAreaProvider) {
     super.addEventEmitters(reactContext, view)
