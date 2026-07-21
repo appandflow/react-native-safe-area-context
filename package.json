@@ -7,6 +7,19 @@
   "react-native": "src/index.tsx",
   "types": "lib/typescript/src/index.d.ts",
   "source": "src/index.tsx",
+  "exports": {
+    ".": {
+      "types": "./lib/typescript/src/index.d.ts",
+      "import": "./lib/module/index.js",
+      "require": "./lib/commonjs/index.js"
+    },
+    "./jest/mock": {
+      "types": "./lib/typescript/jest/mock.d.ts",
+      "import": "./src/jest/mock.tsx",
+      "require": "./src/jest/mock.tsx"
+    },
+    "./package.json": "./package.json"
+  },
   "sideEffects": false,
   "files": [
     "src",
