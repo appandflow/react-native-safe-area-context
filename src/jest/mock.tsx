@@ -1,11 +1,11 @@
 import { jest } from '@jest/globals';
 import React, { useContext } from 'react';
-import type { Metrics } from '../src/SafeArea.types';
+import type { Metrics } from '../SafeArea.types';
 import type {
   SafeAreaProviderProps,
   SafeAreaInsetsContext,
   SafeAreaFrameContext,
-} from '../src/SafeAreaContext';
+} from '../SafeAreaContext';
 
 const MOCK_INITIAL_METRICS: Metrics = {
   frame: {
