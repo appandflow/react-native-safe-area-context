@@ -5,6 +5,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.WindowInsets
 import androidx.annotation.RequiresApi
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import java.lang.IllegalArgumentException
 import kotlin.math.max
 import kotlin.math.min
@@ -29,15 +31,23 @@ private fun getRootWindowInsetsCompatR(rootView: View): EdgeInsets? {
 @Suppress("DEPRECATION")
 private fun getRootWindowInsetsCompatM(rootView: View): EdgeInsets? {
   val insets = rootView.rootWindowInsets ?: return null
+  // Use WindowInsetsCompat to calculate the bottom inset without keyboard height.
+  // The deprecated min(systemWindowInsetBottom, stableInsetBottom) approach can
+  // incorrectly report keyboard height as the bottom inset on some Android 10
+  // devices (e.g. Samsung One UI, Nokia with stock Android), causing SafeAreaView
+  // to add paddingBottom equal to the keyboard height and push screen content up.
+  // WindowInsetsCompat.Type.navigationBars() explicitly excludes IME insets.
+  val bottomInset =
+      ViewCompat.getRootWindowInsets(rootView)
+          ?.getInsets(
+              WindowInsetsCompat.Type.navigationBars() or WindowInsetsCompat.Type.displayCutout())
+          ?.bottom
+          ?.toFloat()
+          ?: min(insets.systemWindowInsetBottom, insets.stableInsetBottom).toFloat()
   return EdgeInsets(
       top = insets.systemWindowInsetTop.toFloat(),
       right = insets.systemWindowInsetRight.toFloat(),
-      // System insets are more reliable to account for notches but the
-      // system inset for bottom includes the soft keyboard which we don't
-      // want to be consistent with iOS. Using the min value makes sure we
-      // never get the keyboard offset while still working with devices that
-      // hide the navigation bar.
-      bottom = min(insets.systemWindowInsetBottom, insets.stableInsetBottom).toFloat(),
+      bottom = bottomInset,
       left = insets.systemWindowInsetLeft.toFloat())
 }
 
