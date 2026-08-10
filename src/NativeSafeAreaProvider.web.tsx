@@ -55,8 +55,8 @@ export function NativeSafeAreaProvider({
     element.addEventListener(getSupportedTransitionEvent(), onEnd);
     onEnd();
     return () => {
-      document.body.removeChild(element);
       element.removeEventListener(getSupportedTransitionEvent(), onEnd);
+      element.remove();
     };
   }, [onInsetsChange]);
 
