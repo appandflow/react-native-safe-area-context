@@ -216,24 +216,20 @@ describe('NativeSafeAreaProvider.web', () => {
     });
   });
 
-  it('updates metrics when an ancestor scroll moves the provider element', () => {
+  it('does not update metrics on a position-only change (known limitation)', () => {
     rectMock.mockReturnValue(makeRect(0, 100, 200, 300));
     const onInsetsChange = jest.fn<InsetChangeNativeCallback>();
     mountProvider(onInsetsChange);
-    // Position-only change, the element moves up by 80px without resizing.
+    const callCount = onInsetsChange.mock.calls.length;
+    // The element moves up by 80px without resizing, e.g. because an
+    // ancestor scrolled or a sibling collapsed. This is intentionally not
+    // observed to keep scrolling free of measurement work; metrics catch up
+    // on the next resize or env() change.
     rectMock.mockReturnValue(makeRect(0, 20, 200, 300));
     act(() => {
       document.dispatchEvent(new Event('scroll'));
     });
-    expect(lastMetrics(onInsetsChange)).toEqual({
-      insets: {
-        top: WINDOW_INSETS.top - 20,
-        bottom: 0,
-        left: WINDOW_INSETS.left,
-        right: 0,
-      },
-      frame: { x: 0, y: 20, width: 200, height: 300 },
-    });
+    expect(onInsetsChange).toHaveBeenCalledTimes(callCount);
   });
 
   it('falls back to window metrics when ResizeObserver is not available', () => {

@@ -88,20 +88,20 @@ export function NativeSafeAreaProvider({
 
     let resizeObserver: ResizeObserver | null = null;
     if (canMeasureProviderElement) {
+      // Note this only observes size changes. Position-only changes (an
+      // ancestor scrolling or a layout shift that moves the element without
+      // resizing it) are not re-reported until the next resize or env()
+      // change. This matches the native implementations, which are driven
+      // by layout and inset change events, and keeps scrolling free of
+      // per-frame measurement work.
       resizeObserver = new ResizeObserver(onEnd);
       resizeObserver.observe(providerElement);
-      // Capture-phase listener so scrolling any ancestor re-measures the
-      // provider element position.
-      window.addEventListener('scroll', onEnd, true);
     }
 
     return () => {
       document.body.removeChild(element);
       element.removeEventListener(getSupportedTransitionEvent(), onEnd);
-      if (resizeObserver != null) {
-        resizeObserver.disconnect();
-        window.removeEventListener('scroll', onEnd, true);
-      }
+      resizeObserver?.disconnect();
     };
   }, [onInsetsChange]);
 
