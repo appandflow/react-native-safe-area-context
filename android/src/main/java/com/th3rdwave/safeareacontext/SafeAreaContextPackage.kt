@@ -30,7 +30,8 @@ class SafeAreaContextPackage : BaseReactPackage() {
               true,
               reactModule.needsEagerInit,
               reactModule.isCxxModule,
-              BuildConfig.IS_NEW_ARCHITECTURE_ENABLED)
+              BuildConfig.IS_NEW_ARCHITECTURE_ENABLED,
+          )
     }
     return ReactModuleInfoProvider { reactModuleInfoMap }
   }

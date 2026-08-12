@@ -8,7 +8,7 @@ internal class InsetsChangeEvent(
     surfaceId: Int,
     viewTag: Int,
     private val mInsets: EdgeInsets,
-    private val mFrame: Rect
+    private val mFrame: Rect,
 ) : Event<InsetsChangeEvent>(surfaceId, viewTag) {
   override fun getEventName() = EVENT_NAME
 

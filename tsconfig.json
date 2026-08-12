@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "rootDir": ".",
     "allowJs": false,
     "allowUnreachableCode": false,
     "allowUnusedLabels": false,
@@ -23,8 +24,7 @@
   "include": [
     "src",
     ".eslintrc.js",
-    "babel.config.js",
-    "jest"
+    "babel.config.js"
   ],
   "exclude": [
     "node_modules",

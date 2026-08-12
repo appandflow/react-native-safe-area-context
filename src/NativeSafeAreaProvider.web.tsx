@@ -84,6 +84,7 @@ export function NativeSafeAreaProvider({
       onInsetsChange({ nativeEvent: { insets, frame } });
     };
     element.addEventListener(getSupportedTransitionEvent(), onEnd);
+    window.addEventListener('resize', onEnd);
     onEnd();
 
     let resizeObserver: ResizeObserver | null = null;
@@ -101,6 +102,7 @@ export function NativeSafeAreaProvider({
     return () => {
       document.body.removeChild(element);
       element.removeEventListener(getSupportedTransitionEvent(), onEnd);
+      window.removeEventListener('resize', onEnd);
       resizeObserver?.disconnect();
     };
   }, [onInsetsChange]);

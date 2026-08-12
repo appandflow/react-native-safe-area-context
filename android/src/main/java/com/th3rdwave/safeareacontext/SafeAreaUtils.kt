@@ -16,13 +16,14 @@ private fun getRootWindowInsetsCompatR(rootView: View): EdgeInsets? {
           WindowInsets.Type.statusBars() or
               WindowInsets.Type.displayCutout() or
               WindowInsets.Type.navigationBars() or
-              WindowInsets.Type.captionBar())
-          ?: return null
+              WindowInsets.Type.captionBar()
+      ) ?: return null
   return EdgeInsets(
       top = insets.top.toFloat(),
       right = insets.right.toFloat(),
       bottom = insets.bottom.toFloat(),
-      left = insets.left.toFloat())
+      left = insets.left.toFloat(),
+  )
 }
 
 @RequiresApi(Build.VERSION_CODES.M)
@@ -38,7 +39,8 @@ private fun getRootWindowInsetsCompatM(rootView: View): EdgeInsets? {
       // never get the keyboard offset while still working with devices that
       // hide the navigation bar.
       bottom = min(insets.systemWindowInsetBottom, insets.stableInsetBottom).toFloat(),
-      left = insets.systemWindowInsetLeft.toFloat())
+      left = insets.systemWindowInsetLeft.toFloat(),
+  )
 }
 
 private fun getRootWindowInsetsCompatBase(rootView: View): EdgeInsets? {
@@ -48,7 +50,8 @@ private fun getRootWindowInsetsCompatBase(rootView: View): EdgeInsets? {
       top = visibleRect.top.toFloat(),
       right = (rootView.width - visibleRect.right).toFloat(),
       bottom = (rootView.height - visibleRect.bottom).toFloat(),
-      left = visibleRect.left.toFloat())
+      left = visibleRect.left.toFloat(),
+  )
 }
 
 private fun getRootWindowInsetsCompat(rootView: View): EdgeInsets? {
@@ -76,7 +79,8 @@ fun getSafeAreaInsets(view: View): EdgeInsets? {
       top = max(windowInsets.top - visibleRect.top, 0f),
       right = max(min(visibleRect.left + view.width - windowWidth, 0f) + windowInsets.right, 0f),
       bottom = max(min(visibleRect.top + view.height - windowHeight, 0f) + windowInsets.bottom, 0f),
-      left = max(windowInsets.left - visibleRect.left, 0f))
+      left = max(windowInsets.left - visibleRect.left, 0f),
+  )
 }
 
 fun getFrame(rootView: ViewGroup, view: View): Rect? {
@@ -98,5 +102,6 @@ fun getFrame(rootView: ViewGroup, view: View): Rect? {
       x = offset.left.toFloat(),
       y = offset.top.toFloat(),
       width = view.width.toFloat(),
-      height = view.height.toFloat())
+      height = view.height.toFloat(),
+  )
 }

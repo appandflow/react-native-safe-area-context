@@ -33,7 +33,8 @@ class SafeAreaView(context: Context?) :
                   SafeAreaViewEdgeModes.ADDITIVE,
                   SafeAreaViewEdgeModes.ADDITIVE,
                   SafeAreaViewEdgeModes.ADDITIVE,
-                  SafeAreaViewEdgeModes.ADDITIVE)
+                  SafeAreaViewEdgeModes.ADDITIVE,
+              )
       val stateWrapper = getStateWrapper()
       if (stateWrapper != null) {
         val map = Arguments.createMap()

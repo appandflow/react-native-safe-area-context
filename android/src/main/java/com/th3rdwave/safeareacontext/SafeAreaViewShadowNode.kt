@@ -81,7 +81,7 @@ class SafeAreaViewShadowNode : LayoutShadowNode() {
   private fun getEdgeValue(
       edgeMode: SafeAreaViewEdgeModes,
       insetValue: Float,
-      edgeValue: Float
+      edgeValue: Float,
   ): Float {
     if (edgeMode == SafeAreaViewEdgeModes.OFF) {
       return edgeValue
@@ -139,7 +139,9 @@ class SafeAreaViewShadowNode : LayoutShadowNode() {
               ViewProps.PADDING_TOP,
               ViewProps.PADDING_BOTTOM,
               ViewProps.PADDING_LEFT,
-              ViewProps.PADDING_RIGHT])
+              ViewProps.PADDING_RIGHT,
+          ]
+  )
   override fun setPaddings(index: Int, padding: Dynamic) {
     val spacingType = ViewProps.PADDING_MARGIN_SPACING_TYPES[index]
     mPaddings[spacingType] =
@@ -159,7 +161,9 @@ class SafeAreaViewShadowNode : LayoutShadowNode() {
               ViewProps.MARGIN_TOP,
               ViewProps.MARGIN_BOTTOM,
               ViewProps.MARGIN_LEFT,
-              ViewProps.MARGIN_RIGHT])
+              ViewProps.MARGIN_RIGHT,
+          ]
+  )
   override fun setMargins(index: Int, margin: Dynamic) {
     val spacingType = ViewProps.PADDING_MARGIN_SPACING_TYPES[index]
     mMargins[spacingType] =
