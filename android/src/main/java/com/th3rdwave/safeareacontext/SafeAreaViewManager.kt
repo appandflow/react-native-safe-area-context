@@ -36,7 +36,8 @@ class SafeAreaViewManager : ReactViewManager() {
     if (propList != null) {
       view.setEdges(
           SafeAreaViewEdges(
-              top = propList.getString("top")?.let { SafeAreaViewEdgeModes.valueOf(it.uppercase()) }
+              top =
+                  propList.getString("top")?.let { SafeAreaViewEdgeModes.valueOf(it.uppercase()) }
                       ?: SafeAreaViewEdgeModes.OFF,
               right =
                   propList.getString("right")?.let { SafeAreaViewEdgeModes.valueOf(it.uppercase()) }
@@ -44,18 +45,19 @@ class SafeAreaViewManager : ReactViewManager() {
               bottom =
                   propList.getString("bottom")?.let {
                     SafeAreaViewEdgeModes.valueOf(it.uppercase())
-                  }
-                      ?: SafeAreaViewEdgeModes.OFF,
+                  } ?: SafeAreaViewEdgeModes.OFF,
               left =
                   propList.getString("left")?.let { SafeAreaViewEdgeModes.valueOf(it.uppercase()) }
-                      ?: SafeAreaViewEdgeModes.OFF))
+                      ?: SafeAreaViewEdgeModes.OFF,
+          )
+      )
     }
   }
 
   override fun updateState(
       view: ReactViewGroup,
       props: ReactStylesDiffMap?,
-      stateWrapper: StateWrapper?
+      stateWrapper: StateWrapper?,
   ): Any? {
     (view as SafeAreaView).setStateWrapper(stateWrapper)
     return null

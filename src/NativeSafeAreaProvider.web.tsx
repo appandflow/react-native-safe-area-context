@@ -53,9 +53,11 @@ export function NativeSafeAreaProvider({
       onInsetsChange({ nativeEvent: { insets, frame } });
     };
     element.addEventListener(getSupportedTransitionEvent(), onEnd);
+    window.addEventListener('resize', onEnd);
     onEnd();
     return () => {
       element.removeEventListener(getSupportedTransitionEvent(), onEnd);
+      window.removeEventListener('resize', onEnd);
       element.remove();
     };
   }, [onInsetsChange]);

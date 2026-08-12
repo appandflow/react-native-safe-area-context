@@ -3,14 +3,14 @@ package com.th3rdwave.safeareacontext
 enum class SafeAreaViewEdgeModes {
   OFF,
   ADDITIVE,
-  MAXIMUM
+  MAXIMUM,
 }
 
 data class SafeAreaViewEdges(
     val top: SafeAreaViewEdgeModes,
     val right: SafeAreaViewEdgeModes,
     val bottom: SafeAreaViewEdgeModes,
-    val left: SafeAreaViewEdgeModes
+    val left: SafeAreaViewEdgeModes,
 )
 
 class Safe
