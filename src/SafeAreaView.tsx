@@ -6,6 +6,8 @@ import type {
   NativeSafeAreaViewInstance,
   NativeSafeAreaViewProps,
 } from './SafeArea.types';
+import { JSSafeAreaView } from './JSSafeAreaView';
+import { SUPPORTS_CORE_SAFE_AREA_INSETS } from './coreSafeAreaInsets';
 import NativeSafeAreaView from './specs/NativeSafeAreaView';
 import { useMemo } from 'react';
 
@@ -18,7 +20,7 @@ const defaultEdges: Record<Edge, EdgeMode> = {
 
 export type SafeAreaViewProps = NativeSafeAreaViewProps;
 
-export const SafeAreaView = React.forwardRef<
+const NativeBackedSafeAreaView = React.forwardRef<
   NativeSafeAreaViewInstance,
   SafeAreaViewProps
 >(({ edges, ...props }, ref) => {
@@ -48,3 +50,12 @@ export const SafeAreaView = React.forwardRef<
 
   return <NativeSafeAreaView {...props} edges={nativeEdges} ref={ref} />;
 });
+
+// When core reports safe area insets itself (see ./coreSafeAreaInsets), the
+// JS implementation the library already uses on web works on every platform:
+// the provider distributes insets through context and this component applies
+// them per-edge as padding or margin. Sync dispatch in core keeps the
+// same-frame behavior the native shadow node implementation had.
+export const SafeAreaView = SUPPORTS_CORE_SAFE_AREA_INSETS
+  ? (JSSafeAreaView as typeof NativeBackedSafeAreaView)
+  : NativeBackedSafeAreaView;
