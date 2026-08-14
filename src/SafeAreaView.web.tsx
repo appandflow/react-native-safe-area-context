@@ -32,92 +32,98 @@ function getEdgeValue(
   }
 }
 
-export const SafeAreaView = React.forwardRef<
-  NativeSafeAreaViewInstance,
-  NativeSafeAreaViewProps
->(({ style = {}, mode, edges, ...rest }, ref) => {
-  const insets = useSafeAreaInsets();
+export const SafeAreaView: React.ForwardRefExoticComponent<
+  React.PropsWithoutRef<NativeSafeAreaViewProps> &
+    React.RefAttributes<NativeSafeAreaViewInstance>
+> = React.forwardRef<NativeSafeAreaViewInstance, NativeSafeAreaViewProps>(
+  ({ style = {}, mode, edges, ...rest }, ref) => {
+    const insets = useSafeAreaInsets();
 
-  const edgesRecord = React.useMemo(() => {
-    if (edges == null) {
-      return defaultEdges;
-    }
+    const edgesRecord = React.useMemo(() => {
+      if (edges == null) {
+        return defaultEdges;
+      }
 
-    return Array.isArray(edges)
-      ? edges.reduce<EdgeRecord>((acc, edge: Edge) => {
-          acc[edge] = 'additive';
-          return acc;
-        }, {})
-      : // ts has trouble with refining readonly arrays.
-        (edges as EdgeRecord);
-  }, [edges]);
+      return Array.isArray(edges)
+        ? edges.reduce<EdgeRecord>((acc, edge: Edge) => {
+            acc[edge] = 'additive';
+            return acc;
+          }, {})
+        : // ts has trouble with refining readonly arrays.
+          (edges as EdgeRecord);
+    }, [edges]);
 
-  const appliedStyle = React.useMemo(() => {
-    const flatStyle = StyleSheet.flatten(style) as Record<string, number>;
+    const appliedStyle = React.useMemo(() => {
+      const flatStyle = StyleSheet.flatten(style) as Record<string, number>;
 
-    if (mode === 'margin') {
-      const {
-        margin = 0,
-        marginVertical = margin,
-        marginHorizontal = margin,
-        marginTop = marginVertical,
-        marginRight = marginHorizontal,
-        marginBottom = marginVertical,
-        marginLeft = marginHorizontal,
-      } = flatStyle;
+      if (mode === 'margin') {
+        const {
+          margin = 0,
+          marginVertical = margin,
+          marginHorizontal = margin,
+          marginTop = marginVertical,
+          marginRight = marginHorizontal,
+          marginBottom = marginVertical,
+          marginLeft = marginHorizontal,
+        } = flatStyle;
 
-      const marginStyle = {
-        marginTop: getEdgeValue(insets.top, marginTop, edgesRecord.top),
-        marginRight: getEdgeValue(insets.right, marginRight, edgesRecord.right),
-        marginBottom: getEdgeValue(
-          insets.bottom,
-          marginBottom,
-          edgesRecord.bottom,
-        ),
-        marginLeft: getEdgeValue(insets.left, marginLeft, edgesRecord.left),
-      };
+        const marginStyle = {
+          marginTop: getEdgeValue(insets.top, marginTop, edgesRecord.top),
+          marginRight: getEdgeValue(
+            insets.right,
+            marginRight,
+            edgesRecord.right,
+          ),
+          marginBottom: getEdgeValue(
+            insets.bottom,
+            marginBottom,
+            edgesRecord.bottom,
+          ),
+          marginLeft: getEdgeValue(insets.left, marginLeft, edgesRecord.left),
+        };
 
-      return [style, marginStyle];
-    } else {
-      const {
-        padding = 0,
-        paddingVertical = padding,
-        paddingHorizontal = padding,
-        paddingTop = paddingVertical,
-        paddingRight = paddingHorizontal,
-        paddingBottom = paddingVertical,
-        paddingLeft = paddingHorizontal,
-      } = flatStyle;
+        return [style, marginStyle];
+      } else {
+        const {
+          padding = 0,
+          paddingVertical = padding,
+          paddingHorizontal = padding,
+          paddingTop = paddingVertical,
+          paddingRight = paddingHorizontal,
+          paddingBottom = paddingVertical,
+          paddingLeft = paddingHorizontal,
+        } = flatStyle;
 
-      const paddingStyle = {
-        paddingTop: getEdgeValue(insets.top, paddingTop, edgesRecord.top),
-        paddingRight: getEdgeValue(
-          insets.right,
-          paddingRight,
-          edgesRecord.right,
-        ),
-        paddingBottom: getEdgeValue(
-          insets.bottom,
-          paddingBottom,
-          edgesRecord.bottom,
-        ),
-        paddingLeft: getEdgeValue(insets.left, paddingLeft, edgesRecord.left),
-      };
+        const paddingStyle = {
+          paddingTop: getEdgeValue(insets.top, paddingTop, edgesRecord.top),
+          paddingRight: getEdgeValue(
+            insets.right,
+            paddingRight,
+            edgesRecord.right,
+          ),
+          paddingBottom: getEdgeValue(
+            insets.bottom,
+            paddingBottom,
+            edgesRecord.bottom,
+          ),
+          paddingLeft: getEdgeValue(insets.left, paddingLeft, edgesRecord.left),
+        };
 
-      return [style, paddingStyle];
-    }
-  }, [
-    edgesRecord.bottom,
-    edgesRecord.left,
-    edgesRecord.right,
-    edgesRecord.top,
-    insets.bottom,
-    insets.left,
-    insets.right,
-    insets.top,
-    mode,
-    style,
-  ]);
+        return [style, paddingStyle];
+      }
+    }, [
+      edgesRecord.bottom,
+      edgesRecord.left,
+      edgesRecord.right,
+      edgesRecord.top,
+      insets.bottom,
+      insets.left,
+      insets.right,
+      insets.top,
+      mode,
+      style,
+    ]);
 
-  return <View style={appliedStyle} {...rest} ref={ref} />;
-});
+    return <View style={appliedStyle} {...rest} ref={ref} />;
+  },
+);

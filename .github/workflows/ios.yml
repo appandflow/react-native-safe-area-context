@@ -6,15 +6,31 @@ on:
       - main
     paths:
       - '.github/workflows/ios.yml'
-      - 'ios/**'
       - 'common/**'
       - 'example/ios/**'
+      - 'example/package.json'
+      - 'example/react-native.config.js'
+      - 'example/yarn.lock'
+      - 'ios/**'
+      - 'package.json'
+      - 'react-native-safe-area-context.podspec'
+      - 'react-native.config.js'
+      - 'src/specs/**'
+      - 'yarn.lock'
   pull_request:
     paths:
       - '.github/workflows/ios.yml'
-      - 'ios/**'
       - 'common/**'
       - 'example/ios/**'
+      - 'example/package.json'
+      - 'example/react-native.config.js'
+      - 'example/yarn.lock'
+      - 'ios/**'
+      - 'package.json'
+      - 'react-native-safe-area-context.podspec'
+      - 'react-native.config.js'
+      - 'src/specs/**'
+      - 'yarn.lock'
 jobs:
   ios-build:
     runs-on: macos-latest
@@ -35,30 +51,6 @@ jobs:
         run: yarn install
         working-directory: example
       - name: Install pods
-        run: RCT_NEW_ARCH_ENABLED=0 npx pod-install
-        working-directory: example/ios
-      - name: Build ios example app
-        run: xcodebuild -scheme ReactTestApp -workspace RNSACExample.xcworkspace ONLY_ACTIVE_ARCH=NO -sdk iphonesimulator -configuration Debug
-        working-directory: example/ios
-  ios-build-fabric:
-    runs-on: macos-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Use Node.js 22.13.0
-        uses: actions/setup-node@v1
-        with:
-          node-version: 22.13.0
-      - uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: 3.2
-          working-directory: example
-          bundler-cache: true
-      - name: Install dependencies
-        run: yarn install
-      - name: Install example app dependencies
-        run: yarn install
-        working-directory: example
-      - name: Install pods for new arch
         run: RCT_NEW_ARCH_ENABLED=1 npx pod-install
         working-directory: example/ios
       - name: Build ios example app

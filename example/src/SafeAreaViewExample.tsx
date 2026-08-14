@@ -53,7 +53,6 @@ export default function ReactNativeSafeAreaView() {
     <SafeAreaProvider>
       <StatusBar
         barStyle={top ? 'light-content' : 'dark-content'}
-        backgroundColor="transparent"
       />
       <View style={styles.background}>
         <SafeAreaView
