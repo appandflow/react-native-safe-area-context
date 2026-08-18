@@ -27,16 +27,34 @@ const RNSafeAreaContext = jest.requireActual<{
   SafeAreaFrameContext: typeof SafeAreaFrameContext;
 }>('react-native-safe-area-context');
 
+// `jest.resetAllMocks()`, which apps commonly call from a global `beforeEach`,
+// strips the implementation off every mock function. That would make these
+// hooks return `undefined` and break every component reading insets or frame.
+// Reinstall the default implementation when it has been stripped, so the hooks
+// keep working while tests can still override them with `mockReturnValue` and
+// friends.
+function mockHook<T extends (...args: never[]) => unknown>(implementation: T) {
+  const hook = jest.fn(implementation);
+  return new Proxy(hook, {
+    apply(target, thisArg, args) {
+      if (target.getMockImplementation() == null) {
+        target.mockImplementation(implementation);
+      }
+      return Reflect.apply(target, thisArg, args);
+    },
+  });
+}
+
 export default {
   ...RNSafeAreaContext,
   initialWindowMetrics: MOCK_INITIAL_METRICS,
-  useSafeAreaInsets: jest.fn(() => {
+  useSafeAreaInsets: mockHook(() => {
     return (
       useContext(RNSafeAreaContext.SafeAreaInsetsContext) ??
       MOCK_INITIAL_METRICS.insets
     );
   }),
-  useSafeAreaFrame: jest.fn(() => {
+  useSafeAreaFrame: mockHook(() => {
     return (
       useContext(RNSafeAreaContext.SafeAreaFrameContext) ??
       MOCK_INITIAL_METRICS.frame
