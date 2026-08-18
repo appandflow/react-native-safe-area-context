@@ -34,6 +34,12 @@ export type InsetChangeNativeCallback = (event: InsetChangedEvent) => void;
 export interface NativeSafeAreaProviderProps extends ViewProps {
   children?: React.ReactNode;
   onInsetsChange: InsetChangeNativeCallback;
+  /**
+   * Web only, undocumented and unstable. Render children without the wrapping
+   * view. Since there is no view to measure, insets and frame fall back to
+   * window values. Has no effect on other platforms.
+   */
+  unstable_disableViewOnWeb?: boolean;
 }
 
 export interface NativeSafeAreaViewProps extends ViewProps {
