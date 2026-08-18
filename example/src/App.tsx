@@ -106,10 +106,7 @@ export default function App() {
 
   return (
     <>
-      <StatusBar
-        hidden={statusBarHidden}
-        backgroundColor="rgba(0, 0, 0, 0.3)"
-      />
+      <StatusBar hidden={statusBarHidden} />
       {content}
     </>
   );
