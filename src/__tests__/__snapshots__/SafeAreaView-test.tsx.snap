@@ -1,8 +1,8 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`SafeAreaView can override padding styles 1`] = `
-<RNCSafeAreaProvider
-  onInsetsChange={[Function]}
+<View
+  onSafeAreaInsetsChange={[Function]}
   style={
     [
       {
@@ -12,29 +12,29 @@ exports[`SafeAreaView can override padding styles 1`] = `
     ]
   }
 >
-  <RNCSafeAreaView
-    edges={
-      {
-        "bottom": "additive",
-        "left": "additive",
-        "right": "additive",
-        "top": "additive",
-      }
-    }
+  <View
     style={
-      {
-        "paddingTop": 0,
-      }
+      [
+        {
+          "paddingTop": 0,
+        },
+        {
+          "paddingBottom": 4,
+          "paddingLeft": 2,
+          "paddingRight": 3,
+          "paddingTop": 1,
+        },
+      ]
     }
   >
     <View />
-  </RNCSafeAreaView>
-</RNCSafeAreaProvider>
+  </View>
+</View>
 `;
 
 exports[`SafeAreaView can set edges 1`] = `
-<RNCSafeAreaProvider
-  onInsetsChange={[Function]}
+<View
+  onSafeAreaInsetsChange={[Function]}
   style={
     [
       {
@@ -44,24 +44,27 @@ exports[`SafeAreaView can set edges 1`] = `
     ]
   }
 >
-  <RNCSafeAreaView
-    edges={
-      {
-        "bottom": "additive",
-        "left": "off",
-        "right": "off",
-        "top": "additive",
-      }
+  <View
+    style={
+      [
+        {},
+        {
+          "paddingBottom": 4,
+          "paddingLeft": 0,
+          "paddingRight": 0,
+          "paddingTop": 1,
+        },
+      ]
     }
   >
     <View />
-  </RNCSafeAreaView>
-</RNCSafeAreaProvider>
+  </View>
+</View>
 `;
 
 exports[`SafeAreaView can set edges value type 1`] = `
-<RNCSafeAreaProvider
-  onInsetsChange={[Function]}
+<View
+  onSafeAreaInsetsChange={[Function]}
   style={
     [
       {
@@ -71,30 +74,30 @@ exports[`SafeAreaView can set edges value type 1`] = `
     ]
   }
 >
-  <RNCSafeAreaView
-    edges={
-      {
-        "bottom": "maximum",
-        "left": "off",
-        "right": "off",
-        "top": "additive",
-      }
-    }
+  <View
     style={
-      {
-        "paddingBottom": 24,
-        "paddingTop": 24,
-      }
+      [
+        {
+          "paddingBottom": 24,
+          "paddingTop": 24,
+        },
+        {
+          "paddingBottom": 24,
+          "paddingLeft": 0,
+          "paddingRight": 0,
+          "paddingTop": 25,
+        },
+      ]
     }
   >
     <View />
-  </RNCSafeAreaView>
-</RNCSafeAreaProvider>
+  </View>
+</View>
 `;
 
 exports[`SafeAreaView renders 1`] = `
-<RNCSafeAreaProvider
-  onInsetsChange={[Function]}
+<View
+  onSafeAreaInsetsChange={[Function]}
   style={
     [
       {
@@ -104,17 +107,20 @@ exports[`SafeAreaView renders 1`] = `
     ]
   }
 >
-  <RNCSafeAreaView
-    edges={
-      {
-        "bottom": "additive",
-        "left": "additive",
-        "right": "additive",
-        "top": "additive",
-      }
+  <View
+    style={
+      [
+        {},
+        {
+          "paddingBottom": 4,
+          "paddingLeft": 2,
+          "paddingRight": 3,
+          "paddingTop": 1,
+        },
+      ]
     }
   >
     <View />
-  </RNCSafeAreaView>
-</RNCSafeAreaProvider>
+  </View>
+</View>
 `;
