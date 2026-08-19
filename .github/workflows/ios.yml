@@ -51,7 +51,7 @@ jobs:
         run: yarn install
         working-directory: example
       - name: Install pods
-        run: RCT_NEW_ARCH_ENABLED=1 npx pod-install
+        run: npx pod-install
         working-directory: example/ios
       - name: Build ios example app
         run: xcodebuild -scheme ReactTestApp -workspace RNSACExample.xcworkspace ONLY_ACTIVE_ARCH=NO -sdk iphonesimulator -configuration Debug
