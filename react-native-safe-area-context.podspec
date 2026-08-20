@@ -2,6 +2,20 @@ require 'json'
 
 package = JSON.parse(File.read(File.join(__dir__, 'package.json')))
 
+unless defined?(install_modules_dependencies)
+  react_native_path = File.dirname(
+    Pod::Executable.execute_command(
+      'node',
+      [
+        '-p',
+        "require.resolve('react-native/package.json', {paths: [process.argv[1]]})",
+        __dir__,
+      ]
+    ).strip
+  )
+  require File.join(react_native_path, 'scripts/react_native_pods')
+end
+
 Pod::Spec.new do |s|
   s.name         = "react-native-safe-area-context"
   s.version      = package['version']

@@ -50,6 +50,9 @@ jobs:
       - name: Install example app dependencies
         run: yarn install
         working-directory: example
+      - name: Validate podspec
+        run: bundle exec pod lib lint ../react-native-safe-area-context.podspec --quick --allow-warnings --no-ansi
+        working-directory: example
       - name: Install pods
         run: npx pod-install
         working-directory: example/ios
