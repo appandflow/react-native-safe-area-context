@@ -81,6 +81,15 @@ android {
         // are only allowed to specify exclude patterns)
         exclude "**/libreact_render*.so"
     }
+    sourceSets.main {
+        if (isNewArchitectureEnabled()) {
+            java.directories.add("${project.buildDir}/generated/source/codegen/java") // contains only java files
+            kotlin.directories.add("src/fabric/java") // contains only kotlin files
+        } else {
+            java.directories.add("src/paper/java") // contains both java and kotlin files
+            kotlin.directories.add("src/paper/java")
+        }
+    }
 }
 
 def reactNativeArchitectures() {
