@@ -3,6 +3,8 @@
 namespace facebook {
 namespace react {
 
+RNCSafeAreaViewState::RNCSafeAreaViewState() = default;
+
 #ifdef ANDROID
 
 folly::dynamic RNCSafeAreaViewState::getDynamic() const {

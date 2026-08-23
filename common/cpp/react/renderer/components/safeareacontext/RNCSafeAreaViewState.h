@@ -32,7 +32,7 @@ class JSI_EXPORT RNCSafeAreaViewState final {
  public:
   using Shared = std::shared_ptr<const RNCSafeAreaViewState>;
 
-  RNCSafeAreaViewState(){};
+  RNCSafeAreaViewState();
 
 #ifdef ANDROID
   RNCSafeAreaViewState(
