@@ -39,12 +39,6 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest]
-        react-native: [0.87.0]
-        react: [19.2.8]
-        include:
-          - os: ubuntu-latest
-            react-native: 0.82.0
-            react: 19.1.1
     defaults:
       run:
         shell: bash
@@ -65,19 +59,61 @@ jobs:
           path: |
             node_modules
             */*/node_modules
-          key: ${{ runner.os }}-rn-${{ matrix.react-native }}-${{ hashFiles('**/yarn.lock') }}
+          key: ${{ runner.os }}-${{ hashFiles('**/yarn.lock') }}
       - name: Install dependencies
         run: yarn install
-      - name: Install React Native ${{ matrix.react-native }} example dependencies
-        run: yarn add --exact "react@${{ matrix.react }}" "react-native@${{ matrix.react-native }}"
+      - name: Install example app dependencies
+        run: yarn install
         working-directory: example
-      - name: Use RN 0.82-compatible Gradle
-        if: matrix.react-native == '0.82.0'
-        run: sed -i 's/gradle-9.4.1-bin.zip/gradle-9.0.0-bin.zip/' example/android/gradle/wrapper/gradle-wrapper.properties
       - name: Build Android example app
-        if: matrix.react-native != '0.82.0'
         run: ./.github/scripts/build-android.sh
-      - name: Compile library against the RN floor
-        if: matrix.react-native == '0.82.0'
-        run: ./gradlew :react-native-safe-area-context:compileDebugKotlin
+
+  android-compatibility:
+    name: Android compatibility (RN ${{ matrix.react-native }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - react-native: '0.82.0'
+            react: '19.1.1'
+          - react-native: '0.83.0'
+            react: '19.2.0'
+          - react-native: '0.84.0'
+            react: '19.2.3'
+          - react-native: '0.85.0'
+            react: '19.2.3'
+          - react-native: '0.86.0'
+            react: '19.2.3'
+          - react-native: '0.87.0'
+            react: '19.2.3'
+    steps:
+      - uses: actions/checkout@v4
+      - name: Use Node.js 22.13.0
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.13.0
+      - uses: actions/setup-java@v2
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+      - name: Restore dependencies
+        uses: actions/cache@v3
+        with:
+          path: |
+            node_modules
+            example/node_modules
+          key: ${{ runner.os }}-compat-rn-${{ matrix.react-native }}-${{ hashFiles('**/yarn.lock') }}
+      - name: Install library dependencies
+        run: yarn install
+      - name: Prepare minimal compatibility app
+        working-directory: example
+        run: |
+          npm pkg delete 'dependencies.@react-native-async-storage/async-storage'
+          npm pkg delete 'dependencies.react-native-gesture-handler'
+          npm pkg delete 'dependencies.react-native-screens'
+          yarn add --exact "react@${{ matrix.react }}" "react-native@${{ matrix.react-native }}"
+          cp node_modules/@react-native/gradle-plugin/gradle/wrapper/gradle-wrapper.properties android/gradle/wrapper/gradle-wrapper.properties
+      - name: Build compatibility app
         working-directory: example/android
+        run: ./gradlew assembleDebug -PreactNativeArchitectures=x86_64
