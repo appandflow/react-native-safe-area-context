@@ -23,15 +23,8 @@ def getExtOrDefault(name, defaultValue) {
     return rootProject.ext.has(name) ? rootProject.ext.get(name) : defaultValue
 }
 
-def isNewArchitectureEnabled() {
-    // To opt-in for the New Architecture, you can either:
-    // - Set `newArchEnabled` to true inside the `gradle.properties` file
-    // - Invoke gradle with `-newArchEnabled=true`
-    // - Set an environment variable `ORG_GRADLE_PROJECT_newArchEnabled=true`
-    return project.hasProperty("newArchEnabled") && project.newArchEnabled == "true"
-}
-
 apply plugin: 'com.android.library'
+apply plugin: 'com.facebook.react'
 
 
 def shouldEnableAgpFallback() {
@@ -50,17 +43,10 @@ if (shouldEnableAgpFallback()) {
     apply plugin: 'kotlin-android'
 }
 
-if (isNewArchitectureEnabled()) {
-    apply plugin: "com.facebook.react"
-}
-
 android {
     def agpVersion = com.android.Version.ANDROID_GRADLE_PLUGIN_VERSION
     if (agpVersion.tokenize('.')[0].toInteger() >= 7) {
         namespace "com.th3rdwave.safeareacontext"
-        buildFeatures {
-            buildConfig true
-        }
     }
 
     compileSdkVersion getExtOrDefault('compileSdkVersion', 30)
@@ -79,8 +65,6 @@ android {
         targetSdkVersion getExtOrDefault('targetSdkVersion', 28)
         versionCode 1
         versionName "1.0"
-        buildConfigField "boolean", "IS_NEW_ARCHITECTURE_ENABLED", isNewArchitectureEnabled().toString()
-
         ndk {
             abiFilters (*reactNativeArchitectures())
         }
@@ -96,15 +80,6 @@ android {
         // only the ones that make the build fail (ideally we should only include libsafeareacontext_modules but we
         // are only allowed to specify exclude patterns)
         exclude "**/libreact_render*.so"
-    }
-    sourceSets.main {
-        if (isNewArchitectureEnabled()) {
-            java.directories.add("${project.buildDir}/generated/source/codegen/java") // contains only java files
-            kotlin.directories.add("src/fabric/java") // contains only kotlin files
-        } else {
-            java.directories.add("src/paper/java") // contains both java and kotlin files
-            kotlin.directories.add("src/paper/java")
-        }
     }
 }
 
