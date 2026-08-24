@@ -39,6 +39,12 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest]
+        react-native: [0.87.0]
+        react: [19.2.8]
+        include:
+          - os: ubuntu-latest
+            react-native: 0.82.0
+            react: 19.1.1
     defaults:
       run:
         shell: bash
@@ -59,11 +65,19 @@ jobs:
           path: |
             node_modules
             */*/node_modules
-          key: ${{ runner.os }}-${{ hashFiles('**/yarn.lock') }}
+          key: ${{ runner.os }}-rn-${{ matrix.react-native }}-${{ hashFiles('**/yarn.lock') }}
       - name: Install dependencies
         run: yarn install
-      - name: Install example app dependencies
-        run: yarn install
+      - name: Install React Native ${{ matrix.react-native }} example dependencies
+        run: yarn add --exact "react@${{ matrix.react }}" "react-native@${{ matrix.react-native }}"
         working-directory: example
+      - name: Use RN 0.82-compatible Gradle
+        if: matrix.react-native == '0.82.0'
+        run: sed -i 's/gradle-9.4.1-bin.zip/gradle-9.0.0-bin.zip/' example/android/gradle/wrapper/gradle-wrapper.properties
       - name: Build Android example app
+        if: matrix.react-native != '0.82.0'
         run: ./.github/scripts/build-android.sh
+      - name: Compile library against the RN floor
+        if: matrix.react-native == '0.82.0'
+        run: ./gradlew :react-native-safe-area-context:compileDebugKotlin
+        working-directory: example/android

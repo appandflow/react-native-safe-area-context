@@ -5,6 +5,7 @@ import com.facebook.react.module.annotations.ReactModule
 import com.facebook.react.uimanager.ThemedReactContext
 import com.facebook.react.uimanager.UIManagerHelper
 import com.facebook.react.uimanager.ViewGroupManager
+import com.facebook.react.uimanager.common.UIManagerType
 import com.facebook.react.viewmanagers.RNCSafeAreaProviderManagerDelegate
 import com.facebook.react.viewmanagers.RNCSafeAreaProviderManagerInterface
 
@@ -37,6 +38,6 @@ class SafeAreaProviderManager :
 private fun handleOnInsetsChange(view: SafeAreaProvider, insets: EdgeInsets, frame: Rect) {
   val reactContext = view.context as ReactContext
   val reactTag = view.id
-  UIManagerHelper.getEventDispatcher(reactContext)
+  UIManagerHelper.getEventDispatcher(reactContext, UIManagerType.FABRIC)
       ?.dispatchEvent(InsetsChangeEvent(getSurfaceId(reactContext), reactTag, insets, frame))
 }
