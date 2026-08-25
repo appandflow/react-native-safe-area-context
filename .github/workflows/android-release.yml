@@ -34,8 +34,8 @@ jobs:
         run: yarn install
         working-directory: example
 
-      - name: Build android example app with new arch disabled
-        run: ./gradlew assembleRelease -PnewArchEnabled=true
+      - name: Build Android example app
+        run: ./gradlew assembleRelease
         working-directory: example/android
 
       - name: Upload APK to Release

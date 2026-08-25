@@ -51,10 +51,7 @@ export default function ReactNativeSafeAreaViewEdges() {
 
   return (
     <SafeAreaProvider>
-      <StatusBar
-        barStyle={top ? 'light-content' : 'dark-content'}
-        backgroundColor="transparent"
-      />
+      <StatusBar barStyle={top ? 'light-content' : 'dark-content'} />
       <View style={styles.background}>
         <SafeAreaView
           style={[

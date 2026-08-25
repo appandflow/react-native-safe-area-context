@@ -21,5 +21,11 @@ jobs:
           key: ${{ runner.os }}-${{ hashFiles('**/yarn.lock') }}
       - name: Install dependencies
         run: yarn install
+      - name: Install example app dependencies
+        run: yarn install
+        working-directory: example
       - name: Run tests
         run: yarn test
+      - name: Typecheck example app
+        run: yarn typecheck
+        working-directory: example

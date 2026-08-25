@@ -1,7 +1,5 @@
 #import "RNCSafeAreaUtils.h"
 
-#import <React/RCTUIManager.h>
-
 NSString *const RNCSafeAreaDidChange = @"RNCSafeAreaDidChange";
 
 #if TARGET_OS_IPHONE
