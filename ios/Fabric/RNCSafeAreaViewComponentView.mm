@@ -32,6 +32,7 @@ using namespace facebook::react;
 - (instancetype)initWithFrame:(CGRect)frame
 {
   if (self = [super initWithFrame:frame]) {
+    self.opaque = NO;
     static const auto defaultProps = std::make_shared<const RNCSafeAreaViewProps>();
     _props = defaultProps;
   }
