@@ -1,20 +1,23 @@
-import { TurboModule, TurboModuleRegistry } from 'react-native';
-import type { Double } from 'react-native/Libraries/Types/CodegenTypes';
+import {
+  TurboModuleRegistry,
+  type CodegenTypes,
+  type TurboModule,
+} from 'react-native';
 
 export interface Spec extends TurboModule {
   getConstants: () => {
     initialWindowMetrics?: {
       insets: {
-        top: Double;
-        right: Double;
-        bottom: Double;
-        left: Double;
+        top: CodegenTypes.Double;
+        right: CodegenTypes.Double;
+        bottom: CodegenTypes.Double;
+        left: CodegenTypes.Double;
       };
       frame: {
-        x: Double;
-        y: Double;
-        width: Double;
-        height: Double;
+        x: CodegenTypes.Double;
+        y: CodegenTypes.Double;
+        width: CodegenTypes.Double;
+        height: CodegenTypes.Double;
       };
     };
   };

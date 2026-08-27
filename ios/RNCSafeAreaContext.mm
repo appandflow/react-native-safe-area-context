@@ -6,16 +6,12 @@
 #elif TARGET_OS_OSX
 #import <AppKit/AppKit.h>
 #endif
-#ifdef RCT_NEW_ARCH_ENABLED
 #import <safeareacontext/safeareacontext.h>
-#endif
 
-#ifdef RCT_NEW_ARCH_ENABLED
 using namespace facebook::react;
 
 @interface RNCSafeAreaContext () <NativeSafeAreaContextSpec>
 @end
-#endif
 
 @implementation RNCSafeAreaContext
 
@@ -73,13 +69,9 @@ RCT_EXPORT_MODULE()
   return constants;
 }
 
-#ifdef RCT_NEW_ARCH_ENABLED
-
 - (std::shared_ptr<TurboModule>)getTurboModule:(const ObjCTurboModule::InitParams &)params
 {
   return std::make_shared<NativeSafeAreaContextSpecJSI>(params);
 }
-
-#endif
 
 @end

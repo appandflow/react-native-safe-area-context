@@ -15,44 +15,10 @@ class SafeAreaViewManager : ReactViewManager() {
 
   override fun createViewInstance(context: ThemedReactContext) = SafeAreaView(context)
 
-  override fun createShadowNodeInstance() = SafeAreaViewShadowNode()
+  // These props are applied by RNCSafeAreaViewShadowNode in C++.
+  @ReactProp(name = "mode") fun setMode(view: SafeAreaView, mode: String?) = Unit
 
-  override fun getShadowNodeClass() = SafeAreaViewShadowNode::class.java
-
-  @ReactProp(name = "mode")
-  fun setMode(view: SafeAreaView, mode: String?) {
-    when (mode) {
-      "padding" -> {
-        view.setMode(SafeAreaViewMode.PADDING)
-      }
-      "margin" -> {
-        view.setMode(SafeAreaViewMode.MARGIN)
-      }
-    }
-  }
-
-  @ReactProp(name = "edges")
-  fun setEdges(view: SafeAreaView, propList: ReadableMap?) {
-    if (propList != null) {
-      view.setEdges(
-          SafeAreaViewEdges(
-              top =
-                  propList.getString("top")?.let { SafeAreaViewEdgeModes.valueOf(it.uppercase()) }
-                      ?: SafeAreaViewEdgeModes.OFF,
-              right =
-                  propList.getString("right")?.let { SafeAreaViewEdgeModes.valueOf(it.uppercase()) }
-                      ?: SafeAreaViewEdgeModes.OFF,
-              bottom =
-                  propList.getString("bottom")?.let {
-                    SafeAreaViewEdgeModes.valueOf(it.uppercase())
-                  } ?: SafeAreaViewEdgeModes.OFF,
-              left =
-                  propList.getString("left")?.let { SafeAreaViewEdgeModes.valueOf(it.uppercase()) }
-                      ?: SafeAreaViewEdgeModes.OFF,
-          )
-      )
-    }
-  }
+  @ReactProp(name = "edges") fun setEdges(view: SafeAreaView, edges: ReadableMap?) = Unit
 
   override fun updateState(
       view: ReactViewGroup,

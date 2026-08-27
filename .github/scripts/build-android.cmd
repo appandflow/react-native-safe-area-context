@@ -6,4 +6,4 @@ subst W: "%GITHUB_WORKSPACE%\example" || exit /b 1
 robocopy W:\node_modules\react-native-test-app W:\r /MIR /NFL /NDL /NJH /NJS /NP
 if %ERRORLEVEL% GEQ 8 exit /b %ERRORLEVEL%
 cd /D W:\android || exit /b 1
-call gradlew.bat assembleDebug -PnewArchEnabled=%1
+call gradlew.bat assembleDebug

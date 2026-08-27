@@ -1,27 +1,23 @@
-import type {
-  DirectEventHandler,
-  Double,
-} from 'react-native/Libraries/Types/CodegenTypes';
-import codegenNativeComponent from 'react-native/Libraries/Utilities/codegenNativeComponent';
-import type { ViewProps, HostComponent } from 'react-native';
+import { codegenNativeComponent } from 'react-native';
+import type { CodegenTypes, HostComponent, ViewProps } from 'react-native';
 
 export type Event = Readonly<{
   insets: Readonly<{
-    top: Double;
-    right: Double;
-    bottom: Double;
-    left: Double;
+    top: CodegenTypes.Double;
+    right: CodegenTypes.Double;
+    bottom: CodegenTypes.Double;
+    left: CodegenTypes.Double;
   }>;
   frame: Readonly<{
-    x: Double;
-    y: Double;
-    width: Double;
-    height: Double;
+    x: CodegenTypes.Double;
+    y: CodegenTypes.Double;
+    width: CodegenTypes.Double;
+    height: CodegenTypes.Double;
   }>;
 }>;
 
 export interface NativeProps extends ViewProps {
-  onInsetsChange?: DirectEventHandler<Event>;
+  onInsetsChange?: CodegenTypes.DirectEventHandler<Event>;
 }
 
 export default codegenNativeComponent<NativeProps>(

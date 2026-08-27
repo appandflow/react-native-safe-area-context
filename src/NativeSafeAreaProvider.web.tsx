@@ -17,7 +17,7 @@ export function NativeSafeAreaProvider({
   style,
   onInsetsChange,
 }: NativeSafeAreaProviderProps) {
-  const viewRef = React.useRef<View>(null);
+  const viewRef = React.useRef<React.ComponentRef<typeof View>>(null);
 
   React.useEffect(() => {
     // Skip for SSR.
