@@ -6,6 +6,7 @@ export function CompatNativeSafeAreaProvider({
   children,
   style,
   onInsetsChange,
+  ...rest
 }: NativeSafeAreaProviderProps) {
   const window = useWindowDimensions();
   React.useEffect(() => {
@@ -24,5 +25,9 @@ export function CompatNativeSafeAreaProvider({
     // @ts-ignore: missing properties
     onInsetsChange({ nativeEvent: { insets, frame } });
   }, [onInsetsChange, window.height, window.width]);
-  return <View style={style}>{children}</View>;
+  return (
+    <View {...rest} style={style}>
+      {children}
+    </View>
+  );
 }

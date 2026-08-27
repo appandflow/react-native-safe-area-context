@@ -5,8 +5,8 @@ import { View } from 'react-native';
 import type { NativeSafeAreaProviderProps } from './SafeArea.types';
 
 const CSSTransitions: Record<string, string> = {
+  transition: 'transitionend',
   WebkitTransition: 'webkitTransitionEnd',
-  Transition: 'transitionEnd',
   MozTransition: 'transitionend',
   MSTransition: 'msTransitionEnd',
   OTransition: 'oTransitionEnd',
@@ -16,6 +16,7 @@ export function NativeSafeAreaProvider({
   children,
   style,
   onInsetsChange,
+  ...rest
 }: NativeSafeAreaProviderProps) {
   const viewRef = React.useRef<View>(null);
 
@@ -108,7 +109,7 @@ export function NativeSafeAreaProvider({
   }, [onInsetsChange]);
 
   return (
-    <View ref={viewRef} style={style}>
+    <View {...rest} ref={viewRef} style={style}>
       {children}
     </View>
   );
@@ -121,7 +122,7 @@ function getSupportedTransitionEvent(): string {
   }
   const element = document.createElement('invalidtype');
 
-  _supportedTransitionEvent = CSSTransitions.Transition;
+  _supportedTransitionEvent = CSSTransitions.transition;
   for (const key in CSSTransitions) {
     if (element.style[key as keyof CSSStyleDeclaration] !== undefined) {
       _supportedTransitionEvent = CSSTransitions[key];
