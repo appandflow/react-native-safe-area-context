@@ -12,7 +12,6 @@
     "moduleResolution": "bundler",
     "noFallthroughCasesInSwitch": true,
     "noImplicitReturns": true,
-    "noStrictGenericChecks": false,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noUncheckedIndexedAccess": true,
@@ -23,7 +22,6 @@
   },
   "include": [
     "src",
-    ".eslintrc.js",
     "babel.config.js"
   ],
   "exclude": [

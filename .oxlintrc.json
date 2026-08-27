@@ -1,0 +1,244 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": ["eslint", "typescript", "react", "jest", "node"],
+  "jsPlugins": [
+    {
+      "name": "react-native",
+      "specifier": "@react-native/eslint-plugin"
+    },
+    {
+      "name": "react-native-specs",
+      "specifier": "@react-native/eslint-plugin-specs"
+    },
+    {
+      "name": "testing-library",
+      "specifier": "eslint-plugin-testing-library"
+    },
+    {
+      "name": "eslint-comments",
+      "specifier": "eslint-plugin-eslint-comments"
+    },
+    {
+      "name": "ft-flow",
+      "specifier": "eslint-plugin-ft-flow"
+    }
+  ],
+  "env": {
+    "es6": true
+  },
+  "globals": {
+    "__DEV__": "writable",
+    "__dirname": "readonly",
+    "__fbBatchedBridgeConfig": "readonly",
+    "AbortController": "readonly",
+    "Blob": "writable",
+    "alert": "readonly",
+    "cancelAnimationFrame": "readonly",
+    "cancelIdleCallback": "readonly",
+    "clearImmediate": "writable",
+    "clearInterval": "readonly",
+    "clearTimeout": "readonly",
+    "console": "readonly",
+    "document": "readonly",
+    "ErrorUtils": "readonly",
+    "escape": "readonly",
+    "Event": "readonly",
+    "EventTarget": "readonly",
+    "exports": "readonly",
+    "fetch": "readonly",
+    "File": "writable",
+    "FileReader": "readonly",
+    "FormData": "readonly",
+    "global": "readonly",
+    "Headers": "readonly",
+    "Intl": "readonly",
+    "Map": "writable",
+    "module": "readonly",
+    "navigator": "readonly",
+    "process": "readonly",
+    "Promise": "writable",
+    "requestAnimationFrame": "writable",
+    "requestIdleCallback": "writable",
+    "require": "readonly",
+    "Set": "writable",
+    "setImmediate": "writable",
+    "setInterval": "readonly",
+    "setTimeout": "readonly",
+    "queueMicrotask": "writable",
+    "URL": "readonly",
+    "URLSearchParams": "readonly",
+    "WebSocket": "writable",
+    "window": "readonly",
+    "XMLHttpRequest": "readonly"
+  },
+  "categories": {
+    "correctness": "warn"
+  },
+  "options": {
+    "reportUnusedDisableDirectives": "warn",
+    "respectEslintDisableDirectives": true
+  },
+  "ignorePatterns": [
+    "typings",
+    "node_modules",
+    "lib",
+    "example/android-bundle.js",
+    "example/ios-bundle.js"
+  ],
+  "rules": {
+    "eslint/no-const-assign": "error",
+    "eslint/no-dupe-class-members": "error",
+    "eslint/no-dupe-keys": "error",
+    "eslint/no-unreachable": "error",
+    "eslint/no-eval": "error",
+    "eslint/no-new-func": "error",
+    "eslint/no-global-assign": "error",
+    "eslint/no-undef": "error",
+    "eslint/no-cond-assign": "warn",
+    "eslint/no-control-regex": "warn",
+    "eslint/no-debugger": "warn",
+    "eslint/no-ex-assign": "warn",
+    "eslint/no-extra-boolean-cast": "warn",
+    "eslint/no-func-assign": "warn",
+    "eslint/no-invalid-regexp": "warn",
+    "eslint/no-obj-calls": "warn",
+    "eslint/no-regex-spaces": "warn",
+    "eslint/no-sparse-arrays": "warn",
+    "eslint/use-isnan": "warn",
+    "eslint/valid-typeof": "warn",
+    "eslint/eqeqeq": ["warn", "always", { "null": "ignore" }],
+    "eslint/no-alert": "warn",
+    "eslint/no-caller": "warn",
+    "eslint/no-div-regex": "warn",
+    "eslint/no-extend-native": "warn",
+    "eslint/no-extra-bind": "warn",
+    "eslint/no-fallthrough": "warn",
+    "eslint/no-implied-eval": "warn",
+    "eslint/no-labels": "warn",
+    "eslint/no-iterator": "warn",
+    "eslint/no-lone-blocks": "warn",
+    "eslint/no-new": "warn",
+    "eslint/no-new-wrappers": "warn",
+    "eslint/no-object-constructor": "warn",
+    "eslint/no-proto": "warn",
+    "eslint/no-return-assign": "warn",
+    "eslint/no-script-url": "warn",
+    "eslint/no-self-compare": "warn",
+    "eslint/no-sequences": "warn",
+    "eslint/no-useless-escape": "warn",
+    "eslint/no-void": "warn",
+    "eslint/no-with": "warn",
+    "eslint/radix": "warn",
+    "eslint/yoda": "warn",
+    "eslint/no-delete-var": "warn",
+    "eslint/no-label-var": "warn",
+    "eslint/no-shadow-restricted-names": "warn",
+    "eslint/no-array-constructor": "warn",
+    "eslint/no-empty-character-class": "warn",
+    "eslint/no-bitwise": "warn",
+    "node/handle-callback-err": "warn",
+    "node/no-mixed-requires": "warn",
+    "node/no-new-require": "warn",
+    "node/no-path-concat": "warn",
+    "eslint-comments/no-aggregating-enable": "warn",
+    "eslint-comments/no-unlimited-disable": "warn",
+    "eslint-comments/no-unused-disable": "warn",
+    "eslint-comments/no-unused-enable": "warn",
+    "eslint/no-unused-vars": [
+      "warn",
+      {
+        "vars": "all",
+        "args": "none",
+        "caughtErrors": "none",
+        "ignoreRestSiblings": true
+      }
+    ],
+    "eslint/no-shadow": "warn",
+    "typescript/no-shadow": "warn",
+    "react/rules-of-hooks": "error",
+    "react/exhaustive-deps": "error",
+    "react/jsx-no-comment-textnodes": "error",
+    "react/jsx-no-duplicate-props": "error",
+    "react/jsx-no-undef": "error",
+    "react/no-string-refs": "error",
+    "react/no-did-mount-set-state": "warn",
+    "react/no-did-update-set-state": "warn",
+    "react/no-unstable-nested-components": "warn",
+    "react/self-closing-comp": "warn",
+    "jest/no-disabled-tests": "warn",
+    "jest/no-focused-tests": "warn",
+    "jest/no-identical-title": "warn",
+    "jest/valid-expect": "warn",
+    "jest/valid-title": "off",
+    "jest/prefer-snapshot-hint": "off",
+    "react-native/no-deep-imports": "warn",
+    "react-native-specs/react-native-modules": "error"
+  },
+  "overrides": [
+    {
+      "files": ["**/*.{ts,tsx}"],
+      "rules": {
+        "eslint/no-undef": "off",
+        "eslint/no-unused-vars": "off",
+        "eslint/no-shadow": "off",
+        "typescript/no-unused-vars": [
+          "error",
+          {
+            "argsIgnorePattern": "^_",
+            "destructuredArrayIgnorePattern": "^_"
+          }
+        ]
+      }
+    },
+    {
+      "files": ["**/*.js"],
+      "rules": {
+        "ft-flow/define-flow-type": "warn",
+        "ft-flow/use-flow-type": "warn"
+      }
+    },
+    {
+      "files": [
+        "**/__tests__/**/*.{js,jsx,ts,tsx}",
+        "**/*{spec,test}.{js,jsx,ts,tsx}"
+      ],
+      "env": {
+        "jest": true
+      },
+      "rules": {
+        "testing-library/await-async-events": [
+          "error",
+          {
+            "eventModule": "userEvent"
+          }
+        ],
+        "testing-library/await-async-queries": "error",
+        "testing-library/await-async-utils": "error",
+        "testing-library/no-await-sync-events": [
+          "error",
+          {
+            "eventModules": ["fire-event"]
+          }
+        ],
+        "testing-library/no-await-sync-queries": "error",
+        "testing-library/no-container": "error",
+        "testing-library/no-debugging-utils": "warn",
+        "testing-library/no-dom-import": ["error", "react"],
+        "testing-library/no-global-regexp-flag-in-query": "error",
+        "testing-library/no-manual-cleanup": "error",
+        "testing-library/no-node-access": "error",
+        "testing-library/no-promise-in-fire-event": "error",
+        "testing-library/no-render-in-lifecycle": "error",
+        "testing-library/no-unnecessary-act": "error",
+        "testing-library/no-wait-for-multiple-assertions": "error",
+        "testing-library/no-wait-for-side-effects": "error",
+        "testing-library/no-wait-for-snapshot": "error",
+        "testing-library/prefer-find-by": "error",
+        "testing-library/prefer-presence-queries": "error",
+        "testing-library/prefer-query-by-disappearance": "error",
+        "testing-library/prefer-screen-queries": "error",
+        "testing-library/render-result-naming-convention": "error"
+      }
+    }
+  ]
+}
