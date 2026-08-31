@@ -2,11 +2,21 @@
   "name": "react-native-safe-area-context",
   "version": "5.9.1",
   "description": "A flexible way to handle safe area, also works on Android and web.",
-  "main": "lib/commonjs/index.js",
-  "module": "lib/module/index.js",
-  "react-native": "src/index.tsx",
-  "types": "lib/typescript/src/index.d.ts",
-  "source": "src/index.tsx",
+  "main": "./lib/module/index.js",
+  "types": "./lib/typescript/src/index.d.ts",
+  "exports": {
+    ".": {
+      "react-native-safe-area-context-source": "./src/index.tsx",
+      "types": "./lib/typescript/src/index.d.ts",
+      "default": "./lib/module/index.js"
+    },
+    "./jest/mock": {
+      "react-native-safe-area-context-source": "./src/jest/mock.tsx",
+      "types": "./lib/typescript/src/jest/mock.d.ts",
+      "default": "./lib/module/jest/mock.js"
+    },
+    "./package.json": "./package.json"
+  },
   "sideEffects": false,
   "files": [
     "src",
@@ -14,10 +24,19 @@
     "android",
     "ios",
     "common",
-    "jest",
     "*.podspec",
     "react-native.config.js",
+    "!lib/commonjs",
+    "!ios/build",
+    "!android/build",
+    "!android/gradle",
+    "!android/gradlew",
+    "!android/gradlew.bat",
+    "!android/local.properties",
     "!**/__tests__",
+    "!**/__fixtures__",
+    "!**/__mocks__",
+    "!**/.*",
     "!example"
   ],
   "author": "Janic Duplessis <janicduplessis@gmail.com>",
@@ -25,6 +44,9 @@
     "Evan Bacon <bacon@expo.io> (https://github.com/evanbacon)"
   ],
   "homepage": "https://github.com/AppAndFlow/react-native-safe-area-context#readme",
+  "bugs": {
+    "url": "https://github.com/AppAndFlow/react-native-safe-area-context/issues"
+  },
   "license": "MIT",
   "scripts": {
     "start": "react-native start",
@@ -84,7 +106,7 @@
     "react": "19.2.8",
     "react-dom": "19.2.8",
     "react-native": "^0.87.0",
-    "react-native-builder-bob": "^0.23.2",
+    "react-native-builder-bob": "^0.43.0",
     "react-test-renderer": "19.2.8",
     "release-it": "^17.4.0",
     "typescript": "^7.0.2"
@@ -127,9 +149,18 @@
     "source": "src",
     "output": "lib",
     "targets": [
-      "commonjs",
-      "module",
-      "typescript"
+      [
+        "module",
+        {
+          "esm": true
+        }
+      ],
+      [
+        "typescript",
+        {
+          "project": "tsconfig.build.json"
+        }
+      ]
     ]
   },
   "codegenConfig": {

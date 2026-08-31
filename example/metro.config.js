@@ -24,6 +24,10 @@ const config = {
   // We need to make sure that only one version is loaded for peerDependencies
   // So we block them at the root, and alias them to the versions in example's node_modules
   resolver: {
+    unstable_conditionNames: [
+      ...(defaultConfig.resolver.unstable_conditionNames ?? []),
+      'react-native-safe-area-context-source',
+    ],
     blockList: [
       ...modules.map(
         (m) =>
