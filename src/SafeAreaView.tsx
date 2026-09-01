@@ -6,7 +6,7 @@ import type {
   NativeSafeAreaViewInstance,
   NativeSafeAreaViewProps,
 } from './SafeArea.types';
-import NativeSafeAreaView from './specs/NativeSafeAreaView';
+import NativeSafeAreaView from './specs/SafeAreaViewNativeComponent';
 import { useMemo } from 'react';
 
 const defaultEdges: Record<Edge, EdgeMode> = {
