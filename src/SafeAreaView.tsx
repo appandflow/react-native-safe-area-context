@@ -6,7 +6,7 @@ import type {
   NativeSafeAreaViewInstance,
   NativeSafeAreaViewProps,
 } from './SafeArea.types';
-import NativeSafeAreaView from './specs/NativeSafeAreaView';
+import NativeSafeAreaView from './specs/SafeAreaViewNativeComponent';
 import { useMemo } from 'react';
 
 const defaultEdges: Record<Edge, EdgeMode> = {
@@ -18,33 +18,35 @@ const defaultEdges: Record<Edge, EdgeMode> = {
 
 export type SafeAreaViewProps = NativeSafeAreaViewProps;
 
-export const SafeAreaView = React.forwardRef<
-  NativeSafeAreaViewInstance,
-  SafeAreaViewProps
->(({ edges, ...props }, ref) => {
-  const nativeEdges = useMemo(() => {
-    if (edges == null) {
-      return defaultEdges;
-    }
+export const SafeAreaView: React.ForwardRefExoticComponent<
+  React.PropsWithoutRef<SafeAreaViewProps> &
+    React.RefAttributes<NativeSafeAreaViewInstance>
+> = React.forwardRef<NativeSafeAreaViewInstance, SafeAreaViewProps>(
+  ({ edges, ...props }, ref) => {
+    const nativeEdges = useMemo(() => {
+      if (edges == null) {
+        return defaultEdges;
+      }
 
-    const edgesObj = Array.isArray(edges)
-      ? edges.reduce<EdgeRecord>((acc, edge: Edge) => {
-          acc[edge] = 'additive';
-          return acc;
-        }, {})
-      : // ts has trouble with refining readonly arrays.
-        (edges as EdgeRecord);
+      const edgesObj = Array.isArray(edges)
+        ? edges.reduce<EdgeRecord>((acc, edge: Edge) => {
+            acc[edge] = 'additive';
+            return acc;
+          }, {})
+        : // ts has trouble with refining readonly arrays.
+          (edges as EdgeRecord);
 
-    // make sure that we always pass all edges, required for fabric
-    const requiredEdges: Record<Edge, EdgeMode> = {
-      top: edgesObj.top ?? 'off',
-      right: edgesObj.right ?? 'off',
-      bottom: edgesObj.bottom ?? 'off',
-      left: edgesObj.left ?? 'off',
-    };
+      // make sure that we always pass all edges, required for fabric
+      const requiredEdges: Record<Edge, EdgeMode> = {
+        top: edgesObj.top ?? 'off',
+        right: edgesObj.right ?? 'off',
+        bottom: edgesObj.bottom ?? 'off',
+        left: edgesObj.left ?? 'off',
+      };
 
-    return requiredEdges;
-  }, [edges]);
+      return requiredEdges;
+    }, [edges]);
 
-  return <NativeSafeAreaView {...props} edges={nativeEdges} ref={ref} />;
-});
+    return <NativeSafeAreaView {...props} edges={nativeEdges} ref={ref} />;
+  },
+);

@@ -18,7 +18,7 @@ export default function ListenerExample() {
 
   return (
     <SafeAreaListener onChange={setData}>
-      <StatusBar barStyle="dark-content" backgroundColor="transparent" />
+      <StatusBar barStyle="dark-content" />
       <SafeAreaView style={{ flex: 1, backgroundColor: '#eee' }}>
         <Card title="Input">
           <TextInput style={{ backgroundColor: '#eee', borderRadius: 3 }} />
