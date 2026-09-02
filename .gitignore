@@ -63,3 +63,7 @@ lib/
 # Expo
 web-build
 .expo
+
+# Swift Package Manager
+.build/
+Package.resolved
