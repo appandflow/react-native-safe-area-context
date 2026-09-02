@@ -168,9 +168,17 @@ describe('Package.swift', () => {
 
 describe('npm package', () => {
   it('ships the manifest but no local SwiftPM state', () => {
+    // npm 10 runs `prepare` (bob build) despite --ignore-scripts; keeping
+    // scripts in the background keeps their output out of the JSON on stdout.
     const packed = execFileSync(
       'npm',
-      ['pack', '--dry-run', '--json', '--ignore-scripts'],
+      [
+        'pack',
+        '--dry-run',
+        '--json',
+        '--ignore-scripts',
+        '--foreground-scripts=false',
+      ],
       { cwd: REPO_ROOT, encoding: 'utf8', maxBuffer: 16 * 1024 * 1024 },
     );
     const [tarball] = JSON.parse(packed) as { files: { path: string }[] }[];
