@@ -9,12 +9,16 @@ on:
       - 'ios/**'
       - 'common/**'
       - 'example/ios/**'
+      - 'Package.swift'
+      - 'src/__tests__/swiftpm-test.ts'
   pull_request:
     paths:
       - '.github/workflows/ios.yml'
       - 'ios/**'
       - 'common/**'
       - 'example/ios/**'
+      - 'Package.swift'
+      - 'src/__tests__/swiftpm-test.ts'
 jobs:
   ios-build:
     runs-on: macos-latest
@@ -55,6 +59,8 @@ jobs:
           bundler-cache: true
       - name: Install dependencies
         run: yarn install
+      - name: Verify SwiftPM manifest
+        run: yarn jest src/__tests__/swiftpm-test.ts
       - name: Install example app dependencies
         run: yarn install
         working-directory: example

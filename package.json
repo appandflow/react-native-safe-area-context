@@ -16,6 +16,7 @@
     "common",
     "jest",
     "*.podspec",
+    "Package.swift",
     "react-native.config.js",
     "!**/__tests__",
     "!example"
