@@ -19,6 +19,14 @@ export function NativeSafeAreaProvider({
 }: NativeSafeAreaProviderProps) {
   const viewRef = React.useRef<View>(null);
 
+  // Callers commonly pass an inline callback, so its identity changes on every
+  // render. Read it through a ref to keep it out of the effect's dependencies:
+  // the measurement setup below only ever needs to call the latest one.
+  const onInsetsChangeRef = React.useRef(onInsetsChange);
+  React.useEffect(() => {
+    onInsetsChangeRef.current = onInsetsChange;
+  }, [onInsetsChange]);
+
   React.useEffect(() => {
     // Skip for SSR.
     if (typeof document === 'undefined') {
@@ -81,7 +89,7 @@ export function NativeSafeAreaProvider({
       }
 
       // @ts-ignore: missing properties
-      onInsetsChange({ nativeEvent: { insets, frame } });
+      onInsetsChangeRef.current({ nativeEvent: { insets, frame } });
     };
     element.addEventListener(getSupportedTransitionEvent(), onEnd);
     window.addEventListener('resize', onEnd);
@@ -105,7 +113,7 @@ export function NativeSafeAreaProvider({
       resizeObserver?.disconnect();
       element.remove();
     };
-  }, [onInsetsChange]);
+  }, []);
 
   return (
     <View ref={viewRef} style={style}>
