@@ -29,6 +29,12 @@ export interface SafeAreaProviderProps extends ViewProps {
    * @deprecated
    */
   initialSafeAreaInsets?: EdgeInsets | null;
+  /**
+   * Web only, undocumented and unstable. Render children without the wrapping
+   * view. Since there is no view to measure, insets and frame fall back to
+   * window values. Has no effect on other platforms.
+   */
+  unstable_disableViewOnWeb?: boolean;
 }
 
 export function SafeAreaProvider({
