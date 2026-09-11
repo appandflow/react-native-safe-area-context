@@ -24,6 +24,7 @@
 - (instancetype)initWithBridge:(RCTBridge *)bridge
 {
   if (self = [super initWithFrame:CGRectZero]) {
+    self.opaque = NO;
     _bridge = bridge;
     // Defaults
     _mode = RNCSafeAreaViewModePadding;
