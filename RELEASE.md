@@ -6,25 +6,6 @@ JavaScript, Android, and iOS checks on the same commit. After approval of the
 `release` environment, it publishes the saved tarball through npm trusted
 publishing with provenance. Stable releases use `latest`; prereleases use `next`.
 
-## One-time setup
-
-In npm package Settings → Trusted Publisher, configure GitHub Actions:
-
-| Field             | Value                            |
-| ----------------- | -------------------------------- |
-| Organization      | `appandflow`                     |
-| Repository        | `react-native-safe-area-context` |
-| Workflow filename | `release.yml`                    |
-| Environment       | `release`                        |
-| Allowed action    | Direct `npm publish`             |
-
-Save and verify the connection. Create GitHub's `release` environment with a
-maintainer reviewer and deployment **tag** rule `v*`. No npm write token is
-needed. See [npm trusted publishing](https://docs.npmjs.com/trusted-publishers/).
-
-Keep the canonical lowercase repository URL in `package.json`; npm provenance
-checks it against the GitHub repository identity.
-
 ## Release
 
 1. Check npm's current versions and prepare the version bump in a separate PR.
