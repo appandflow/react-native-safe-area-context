@@ -1,0 +1,139 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      publish:
+        description: 'Publish the selected v* tag (false runs checks only)'
+        type: boolean
+        default: false
+  pull_request:
+    paths:
+      - '.github/workflows/release.yml'
+      - '.github/workflows/js.yml'
+      - '.github/workflows/android.yml'
+      - '.github/workflows/ios.yml'
+      - 'scripts/**'
+      - 'package.json'
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ (github.event_name == 'push' || inputs.publish) && 'npm-release' || format('release-check-{0}', github.ref) }}
+  cancel-in-progress: false
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    outputs:
+      sha: ${{ steps.candidate.outputs.sha }}
+      version: ${{ steps.candidate.outputs.version }}
+      publish: ${{ steps.candidate.outputs.publish }}
+      filename: ${{ steps.pack.outputs.filename }}
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with:
+          fetch-depth: 0
+      - name: Use Node.js 24
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: 24
+          package-manager-cache: false
+      - name: Validate candidate before native CI
+        id: candidate
+        env:
+          PUBLISH: ${{ github.event_name == 'push' || inputs.publish == true }}
+        run: |
+          set -euo pipefail
+          if [[ "$PUBLISH" == true ]]; then
+            [[ "$GITHUB_REF" == refs/tags/v* ]] || { echo 'Select a v* tag to publish, not a branch.' >&2; exit 1; }
+            git merge-base --is-ancestor HEAD origin/main
+            node scripts/check-release.mjs "$GITHUB_REF_NAME"
+          else
+            node scripts/check-release.mjs
+          fi
+          echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+          echo "version=$(node -p 'require("./package.json").version')" >> "$GITHUB_OUTPUT"
+          echo "publish=$PUBLISH" >> "$GITHUB_OUTPUT"
+      - name: Enable the pinned Yarn version
+        run: |
+          corepack enable
+          corepack prepare yarn@1.22.22 --activate
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+      - name: Test release safeguards
+        run: node --test scripts/*.test.mjs
+      - name: Build package
+        run: yarn build
+      - name: Pack and inspect
+        id: pack
+        run: |
+          mkdir artifacts
+          npm pack --ignore-scripts --pack-destination artifacts --json > "$RUNNER_TEMP/pack.json"
+          filename=$(node -e 'const fs=require("node:fs"); const [p]=JSON.parse(fs.readFileSync(process.argv[1],"utf8")); console.log(p.filename)' "$RUNNER_TEMP/pack.json")
+          node scripts/check-package.mjs "./artifacts/$filename"
+          echo "filename=$filename" >> "$GITHUB_OUTPUT"
+      - name: Preserve verified package
+        uses: actions/upload-artifact@v4
+        with:
+          name: npm-package
+          path: artifacts/*.tgz
+          if-no-files-found: error
+          retention-days: 7
+
+  verify-javascript:
+    if: github.event_name != 'pull_request'
+    needs: package
+    uses: ./.github/workflows/js.yml
+    with:
+      ref: ${{ needs.package.outputs.sha }}
+
+  verify-android:
+    if: github.event_name != 'pull_request'
+    needs: package
+    uses: ./.github/workflows/android.yml
+    with:
+      ref: ${{ needs.package.outputs.sha }}
+
+  verify-ios:
+    if: github.event_name != 'pull_request'
+    needs: package
+    uses: ./.github/workflows/ios.yml
+    with:
+      ref: ${{ needs.package.outputs.sha }}
+
+  publish:
+    if: needs.package.outputs.publish == 'true'
+    needs: [package, verify-javascript, verify-android, verify-ios]
+    runs-on: ubuntu-latest
+    environment: release
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with:
+          ref: ${{ needs.package.outputs.sha }}
+      - name: Use Node.js 24
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org
+          package-manager-cache: false
+      - name: Download verified package
+        uses: actions/download-artifact@v4
+        with:
+          name: npm-package
+          path: artifacts
+      - name: Publish and verify with npm trusted publishing
+        env:
+          PACKAGE_FILENAME: ${{ needs.package.outputs.filename }}
+          RELEASE_VERSION: ${{ needs.package.outputs.version }}
+        run: |
+          node --version
+          npm --version
+          node scripts/publish-package.mjs "./artifacts/$PACKAGE_FILENAME" "$RELEASE_VERSION"
