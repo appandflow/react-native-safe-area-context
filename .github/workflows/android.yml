@@ -1,6 +1,11 @@
 name: Android build
 
 on:
+  workflow_call:
+    inputs:
+      ref:
+        type: string
+        required: false
   push:
     branches:
       - main
@@ -28,26 +33,28 @@ jobs:
         shell: bash
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref || github.ref }}
       - name: Use Node.js 22.13.0
         uses: actions/setup-node@v4
         with:
           node-version: 22.13.0
-      - uses: actions/setup-java@v2
+      - uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '17'
       - name: Restore yarn workspaces
         id: yarn-cache
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: |
             node_modules
             */*/node_modules
           key: ${{ runner.os }}-${{ hashFiles('**/yarn.lock') }}
       - name: Install dependencies
-        run: yarn install
+        run: yarn install --frozen-lockfile
       - name: Install example app dependencies
-        run: yarn install
+        run: yarn install --frozen-lockfile
         working-directory: example
       - name: Build android example app with new arch disabled
         run: ./.github/scripts/build-android.sh false
@@ -62,26 +69,28 @@ jobs:
         shell: bash
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref || github.ref }}
       - name: Use Node.js 22.13.0
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v4
         with:
           node-version: 22.13.0
-      - uses: actions/setup-java@v2
+      - uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '17'
       - name: Restore yarn workspaces
         id: yarn-cache
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: |
             node_modules
             */*/node_modules
           key: ${{ runner.os }}-${{ hashFiles('**/yarn.lock') }}
       - name: Install dependencies
-        run: yarn install
+        run: yarn install --frozen-lockfile
       - name: Install example app dependencies
-        run: yarn install
+        run: yarn install --frozen-lockfile
         working-directory: example
       - name: Build android example app with new arch enabled
         run: ./.github/scripts/build-android.sh true

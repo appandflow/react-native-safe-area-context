@@ -41,6 +41,7 @@
     "format:spotless:write": "cd android && ./gradlew spotlessApply",
     "format:check": "yarn format:prettier:check && yarn format:clang:check && yarn format:spotless:check",
     "format:write": "yarn format:prettier:write && yarn format:clang:write && yarn format:spotless:write",
+    "build": "bob build",
     "release": "release-it",
     "prepare": "bob build"
   },
@@ -95,7 +96,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/AppAndFlow/react-native-safe-area-context.git"
+    "url": "git+https://github.com/appandflow/react-native-safe-area-context.git"
   },
   "jest": {
     "preset": "@react-native/jest-preset",

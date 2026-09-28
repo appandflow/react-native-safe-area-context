@@ -1,6 +1,11 @@
 name: iOS build
 
 on:
+  workflow_call:
+    inputs:
+      ref:
+        type: string
+        required: false
   push:
     branches:
       - main
@@ -24,6 +29,8 @@ jobs:
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref || github.ref }}
       - name: Use Node.js 22.13.0
         uses: actions/setup-node@v4
         with:
@@ -34,9 +41,9 @@ jobs:
           working-directory: example
           bundler-cache: true
       - name: Install dependencies
-        run: yarn install
+        run: yarn install --frozen-lockfile
       - name: Install example app dependencies
-        run: yarn install
+        run: yarn install --frozen-lockfile
         working-directory: example
       - name: Install pods
         run: RCT_NEW_ARCH_ENABLED=0 npx pod-install
@@ -48,8 +55,10 @@ jobs:
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref || github.ref }}
       - name: Use Node.js 22.13.0
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v4
         with:
           node-version: 22.13.0
       - uses: ruby/setup-ruby@v1
@@ -58,11 +67,11 @@ jobs:
           working-directory: example
           bundler-cache: true
       - name: Install dependencies
-        run: yarn install
+        run: yarn install --frozen-lockfile
       - name: Verify SwiftPM manifest
         run: yarn jest src/__tests__/swiftpm-test.ts
       - name: Install example app dependencies
-        run: yarn install
+        run: yarn install --frozen-lockfile
         working-directory: example
       - name: Install pods for new arch
         run: RCT_NEW_ARCH_ENABLED=1 npx pod-install
