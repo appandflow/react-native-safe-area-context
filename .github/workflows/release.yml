@@ -38,10 +38,10 @@ jobs:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
         with:
           fetch-depth: 0
-      - name: Use Node.js 24
+      - name: Use the repository build runtime
         uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
         with:
-          node-version: 24
+          node-version: 22.13.0
           package-manager-cache: false
       - name: Validate candidate before native CI
         id: candidate
@@ -73,8 +73,8 @@ jobs:
         id: pack
         run: |
           mkdir artifacts
-          npm pack --ignore-scripts --pack-destination artifacts --json > "$RUNNER_TEMP/pack.json"
-          filename=$(node -e 'const fs=require("node:fs"); const [p]=JSON.parse(fs.readFileSync(process.argv[1],"utf8")); console.log(p.filename)' "$RUNNER_TEMP/pack.json")
+          npm pack --ignore-scripts --pack-destination artifacts
+          filename=$(node -e 'const fs=require("node:fs"); const files=fs.readdirSync("artifacts").filter(f=>f.endsWith(".tgz")); if(files.length!==1) throw new Error("Expected exactly one tarball"); console.log(files[0])')
           node scripts/check-package.mjs "./artifacts/$filename"
           echo "filename=$filename" >> "$GITHUB_OUTPUT"
       - name: Preserve verified package
