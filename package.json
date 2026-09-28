@@ -136,6 +136,9 @@
       "typescript"
     ]
   },
+  "swiftpmConfig": {
+    "name": "ReactNativeSafeAreaContext"
+  },
   "codegenConfig": {
     "android": {
       "javaPackageName": "com.th3rdwave.safeareacontext"
