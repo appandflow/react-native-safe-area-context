@@ -1,8 +1,8 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`SafeAreaContext does not render child until inset values are received 1`] = `
-<RNCSafeAreaProvider
-  onInsetsChange={[Function]}
+<View
+  onSafeAreaInsetsChange={[Function]}
   style={
     [
       {
@@ -15,8 +15,8 @@ exports[`SafeAreaContext does not render child until inset values are received 1
 `;
 
 exports[`SafeAreaContext renders 1`] = `
-<RNCSafeAreaProvider
-  onInsetsChange={[Function]}
+<View
+  onSafeAreaInsetsChange={[Function]}
   style={
     [
       {
@@ -29,8 +29,8 @@ exports[`SafeAreaContext renders 1`] = `
 `;
 
 exports[`SafeAreaContext renders child when inset values are received 1`] = `
-<RNCSafeAreaProvider
-  onInsetsChange={[Function]}
+<View
+  onSafeAreaInsetsChange={[Function]}
   style={
     [
       {
@@ -44,8 +44,8 @@ exports[`SafeAreaContext renders child when inset values are received 1`] = `
 `;
 
 exports[`SafeAreaContext renders child when inset values are received 2`] = `
-<RNCSafeAreaProvider
-  onInsetsChange={[Function]}
+<View
+  onSafeAreaInsetsChange={[Function]}
   style={
     [
       {
@@ -70,12 +70,12 @@ exports[`SafeAreaContext renders child when inset values are received 2`] = `
       }
     }
   />
-</RNCSafeAreaProvider>
+</View>
 `;
 
 exports[`SafeAreaContext supports setting initial insets 1`] = `
-<RNCSafeAreaProvider
-  onInsetsChange={[Function]}
+<View
+  onSafeAreaInsetsChange={[Function]}
   style={
     [
       {
@@ -99,12 +99,12 @@ exports[`SafeAreaContext supports setting initial insets 1`] = `
       }
     }
   />
-</RNCSafeAreaProvider>
+</View>
 `;
 
 exports[`SafeAreaContext uses inner insets 1`] = `
-<RNCSafeAreaProvider
-  onInsetsChange={[Function]}
+<View
+  onSafeAreaInsetsChange={[Function]}
   style={
     [
       {
@@ -114,8 +114,8 @@ exports[`SafeAreaContext uses inner insets 1`] = `
     ]
   }
 >
-  <RNCSafeAreaProvider
-    onInsetsChange={[Function]}
+  <View
+    onSafeAreaInsetsChange={[Function]}
     style={
       [
         {
@@ -139,13 +139,13 @@ exports[`SafeAreaContext uses inner insets 1`] = `
         }
       }
     />
-  </RNCSafeAreaProvider>
-</RNCSafeAreaProvider>
+  </View>
+</View>
 `;
 
 exports[`SafeAreaContext uses parent insets when available 1`] = `
-<RNCSafeAreaProvider
-  onInsetsChange={[Function]}
+<View
+  onSafeAreaInsetsChange={[Function]}
   style={
     [
       {
@@ -155,8 +155,8 @@ exports[`SafeAreaContext uses parent insets when available 1`] = `
     ]
   }
 >
-  <RNCSafeAreaProvider
-    onInsetsChange={[Function]}
+  <View
+    onSafeAreaInsetsChange={[Function]}
     style={
       [
         {
@@ -180,6 +180,6 @@ exports[`SafeAreaContext uses parent insets when available 1`] = `
         }
       }
     />
-  </RNCSafeAreaProvider>
-</RNCSafeAreaProvider>
+  </View>
+</View>
 `;
