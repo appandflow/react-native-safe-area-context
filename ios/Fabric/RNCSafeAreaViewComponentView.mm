@@ -17,6 +17,33 @@ using namespace facebook::react;
 @interface RNCSafeAreaViewComponentView () <RCTRNCSafeAreaViewViewProtocol>
 @end
 
+#if TARGET_OS_IPHONE
+// Mirror of the provider-side derivation (see
+// RNCSafeAreaProviderComponentView.mm): substitute window-derived insets
+// when an attached provider view still reads all-zero (iOS 26.4+ reattach
+// propagation bug).
+static UIEdgeInsets RNCViewDeriveInsetsFromWindow(UIView *view, UIEdgeInsets current)
+{
+  UIWindow *window = view.window;
+  if (window == nil || !UIEdgeInsetsEqualToEdgeInsets(current, UIEdgeInsetsZero)) {
+    return current;
+  }
+  UIEdgeInsets w = window.safeAreaInsets;
+  if (UIEdgeInsetsEqualToEdgeInsets(w, UIEdgeInsetsZero)) {
+    return current;
+  }
+  CGRect fw = [view convertRect:view.bounds toView:window];
+  CGFloat winW = window.bounds.size.width;
+  CGFloat winH = window.bounds.size.height;
+  UIEdgeInsets derived;
+  derived.top = MAX(0, w.top - MAX(0, CGRectGetMinY(fw)));
+  derived.left = MAX(0, w.left - MAX(0, CGRectGetMinX(fw)));
+  derived.bottom = MAX(0, w.bottom - MAX(0, winH - CGRectGetMaxY(fw)));
+  derived.right = MAX(0, w.right - MAX(0, winW - CGRectGetMaxX(fw)));
+  return derived;
+}
+#endif
+
 @implementation RNCSafeAreaViewComponentView {
   RNCSafeAreaViewShadowNode::ConcreteState::Shared _state;
   UIEdgeInsets _currentSafeAreaInsets;
@@ -72,6 +99,11 @@ using namespace facebook::react;
 
 - (void)didMoveToWindow
 {
+  [self attachToProviderView];
+}
+
+- (void)attachToProviderView
+{
   UIView *previousProviderView = _providerView;
   _providerView = [self findNearestProvider];
 
@@ -84,6 +116,37 @@ using namespace facebook::react;
                                                name:RNCSafeAreaDidChange
                                              object:_providerView];
   }
+
+  // Mirror of the provider's deferred re-check (see
+  // RNCSafeAreaProviderComponentView didMoveToWindow): on iOS 26.4+ a
+  // reattached subtree can receive its safe-area insets without any
+  // callback or layout pass following, so the value read at attach time
+  // (often zero) would stick. Re-read after the runloop settles.
+  if (self.window != nil) {
+    __weak __typeof__(self) weakSelf = self;
+    dispatch_async(dispatch_get_main_queue(), ^{
+      [weakSelf updateStateIfNecessary];
+      dispatch_async(dispatch_get_main_queue(), ^{
+        [weakSelf updateStateIfNecessary];
+      });
+    });
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.15 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+      [weakSelf updateStateIfNecessary];
+    });
+  }
+}
+
+// findNearestProvider can race view reparenting (e.g. native tabs on
+// iOS 26.4+): at didMoveToWindow time the provider may not be in the
+// ancestor chain yet, so the fallback binds to `self` — a view that never
+// posts RNCSafeAreaDidChange — and this view reads its own (possibly zero)
+// insets until the NEXT detach/reattach re-resolves it (which is why a
+// push/pop "healed" it). Keep retrying on later passes until a real
+// provider is found; apps genuinely without a provider still converge to
+// the legacy self-fallback because retries keep returning self.
+- (BOOL)needsProviderReattach
+{
+  return _providerView == nil || _providerView == (UIView *)self;
 }
 
 - (void)safeAreaProviderInsetsDidChange:(NSNotification *)notification
@@ -103,7 +166,7 @@ using namespace facebook::react;
     return;
   }
 #if TARGET_OS_IPHONE
-  UIEdgeInsets safeAreaInsets = _providerView.safeAreaInsets;
+  UIEdgeInsets safeAreaInsets = RNCViewDeriveInsetsFromWindow(_providerView, _providerView.safeAreaInsets);
 
   if (UIEdgeInsetsEqualToEdgeInsetsWithThreshold(safeAreaInsets, _currentSafeAreaInsets, 1.0 / RCTScreenScale())) {
     return;
@@ -160,7 +223,19 @@ using namespace facebook::react;
 - (void)finalizeUpdates:(RNComponentViewUpdateMask)updateMask
 {
   [super finalizeUpdates:updateMask];
-  [self updateStateIfNecessary];
+  if ([self needsProviderReattach]) {
+    [self attachToProviderView];
+  } else {
+    [self updateStateIfNecessary];
+  }
+}
+
+- (void)layoutSubviews
+{
+  [super layoutSubviews];
+  if ([self needsProviderReattach]) {
+    [self attachToProviderView];
+  }
 }
 
 - (void)prepareForRecycle
