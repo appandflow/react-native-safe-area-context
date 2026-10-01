@@ -18,6 +18,28 @@ Consumers are components and hooks that allow using inset values provided by the
 
 - [useSafeAreaInsets](/api/use-safe-area-insets) offers more flexibility, but can cause some layout flicker in certain cases. Use this if you need more control over how insets are applied.
 
+### Android edge-to-edge and display cutouts
+
+Android 15 displays apps edge-to-edge when they target SDK 35 or later, and Android 16 removes the opt-out for apps targeting SDK 36. On React Native 0.81 or later, apps that use the standard `ReactActivity` can enable the same behavior on supported earlier Android versions in `android/gradle.properties`:
+
+```properties
+edgeToEdgeEnabled=true
+```
+
+When React Native is hosted in a custom activity or fragment, or when using an older React Native version, follow Android's [edge-to-edge setup guide](https://developer.android.com/develop/ui/views/layout/edge-to-edge) instead. The Gradle property only configures `ReactActivity`.
+
+Keep a [SafeAreaProvider](/api/safe-area-provider) at the app root and consume its insets around content that must not be covered by system bars or [display cutouts](https://developer.android.com/develop/ui/views/layout/display-cutout):
+
+```tsx
+<SafeAreaProvider>
+  <SafeAreaView style={{ flex: 1 }} edges={['top', 'right', 'bottom', 'left']}>
+    {/* App content */}
+  </SafeAreaView>
+</SafeAreaProvider>
+```
+
+Avoid legacy workarounds such as `FLAG_LAYOUT_NO_LIMITS`, and do not use `windowLayoutInDisplayCutoutMode` as a replacement for consuming safe-area insets. On Android 15, apps targeting SDK 35 have every non-floating cutout mode interpreted as `always`; important content still needs inset handling. Test both portrait and landscape layouts with the emulated cutouts available under Android's developer options.
+
 ### Keyboard handling
 
 The safe area insets do not include the software keyboard. It is recommended to use [react-native-keyboard-controller](https://github.com/kirillzyusko/react-native-keyboard-controller) to handle those.
