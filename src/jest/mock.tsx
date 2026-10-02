@@ -1,10 +1,17 @@
 import { jest } from '@jest/globals';
 import React, { useContext } from 'react';
-import type { Metrics } from '../SafeArea.types';
 import type {
+  EdgeInsets,
+  InsetChangedEvent,
+  Metrics,
+  NativeSafeAreaViewInstance,
+  NativeSafeAreaViewProps,
+  Rect,
+} from '../SafeArea.types';
+import type {
+  SafeAreaListenerProps,
   SafeAreaProviderProps,
-  SafeAreaInsetsContext,
-  SafeAreaFrameContext,
+  WithSafeAreaInsetsProps,
 } from '../SafeAreaContext';
 
 const MOCK_INITIAL_METRICS: Metrics = {
@@ -22,38 +29,79 @@ const MOCK_INITIAL_METRICS: Metrics = {
   },
 };
 
-const RNSafeAreaContext = jest.requireActual<{
-  SafeAreaInsetsContext: typeof SafeAreaInsetsContext;
-  SafeAreaFrameContext: typeof SafeAreaFrameContext;
-}>('react-native-safe-area-context');
+const SafeAreaInsetsContext = React.createContext<EdgeInsets | null>(null);
+const SafeAreaFrameContext = React.createContext<Rect | null>(null);
+
+const useSafeAreaInsets = jest.fn(() => {
+  return useContext(SafeAreaInsetsContext) ?? MOCK_INITIAL_METRICS.insets;
+});
+
+const useSafeAreaFrame = jest.fn(() => {
+  return useContext(SafeAreaFrameContext) ?? MOCK_INITIAL_METRICS.frame;
+});
+
+const SafeAreaProvider = ({
+  children,
+  initialMetrics,
+}: SafeAreaProviderProps) => {
+  return (
+    <SafeAreaFrameContext.Provider
+      value={initialMetrics?.frame ?? MOCK_INITIAL_METRICS.frame}
+    >
+      <SafeAreaInsetsContext.Provider
+        value={initialMetrics?.insets ?? MOCK_INITIAL_METRICS.insets}
+      >
+        {children}
+      </SafeAreaInsetsContext.Provider>
+    </SafeAreaFrameContext.Provider>
+  );
+};
+
+const SafeAreaListener = ({
+  children,
+  onChange,
+  ...props
+}: SafeAreaListenerProps) => {
+  return React.createElement(
+    'RNCSafeAreaProvider',
+    {
+      ...props,
+      onInsetsChange: ({ nativeEvent }: InsetChangedEvent) =>
+        onChange(nativeEvent),
+    },
+    children,
+  );
+};
+
+const SafeAreaView = React.forwardRef<
+  NativeSafeAreaViewInstance,
+  NativeSafeAreaViewProps
+>((props, ref) => {
+  return React.createElement('RNCSafeAreaView', { ...props, ref });
+});
+
+const withSafeAreaInsets = <T,>(
+  WrappedComponent: React.ComponentType<
+    (React.PropsWithoutRef<T> | T) & WithSafeAreaInsetsProps
+  >,
+) =>
+  React.forwardRef<unknown, T>((props, ref) => {
+    const insets = useSafeAreaInsets();
+    return <WrappedComponent {...props} insets={insets} ref={ref} />;
+  });
 
 export default {
-  ...RNSafeAreaContext,
+  SafeAreaInsetsContext,
+  SafeAreaFrameContext,
+  SafeAreaProvider,
+  SafeAreaListener,
+  SafeAreaView,
+  SafeAreaConsumer: SafeAreaInsetsContext.Consumer,
+  SafeAreaContext: SafeAreaInsetsContext,
   initialWindowMetrics: MOCK_INITIAL_METRICS,
-  useSafeAreaInsets: jest.fn(() => {
-    return (
-      useContext(RNSafeAreaContext.SafeAreaInsetsContext) ??
-      MOCK_INITIAL_METRICS.insets
-    );
-  }),
-  useSafeAreaFrame: jest.fn(() => {
-    return (
-      useContext(RNSafeAreaContext.SafeAreaFrameContext) ??
-      MOCK_INITIAL_METRICS.frame
-    );
-  }),
-  // Provide a simpler implementation with default values.
-  SafeAreaProvider: ({ children, initialMetrics }: SafeAreaProviderProps) => {
-    return (
-      <RNSafeAreaContext.SafeAreaFrameContext.Provider
-        value={initialMetrics?.frame ?? MOCK_INITIAL_METRICS.frame}
-      >
-        <RNSafeAreaContext.SafeAreaInsetsContext.Provider
-          value={initialMetrics?.insets ?? MOCK_INITIAL_METRICS.insets}
-        >
-          {children}
-        </RNSafeAreaContext.SafeAreaInsetsContext.Provider>
-      </RNSafeAreaContext.SafeAreaFrameContext.Provider>
-    );
-  },
+  initialWindowSafeAreaInsets: null,
+  useSafeAreaInsets,
+  useSafeAreaFrame,
+  useSafeArea: useSafeAreaInsets,
+  withSafeAreaInsets,
 };
