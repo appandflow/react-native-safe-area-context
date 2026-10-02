@@ -35,7 +35,7 @@ function getEdgeValue(
 export const SafeAreaView = React.forwardRef<
   NativeSafeAreaViewInstance,
   NativeSafeAreaViewProps
->(({ style = {}, mode, edges, ...rest }, ref) => {
+>(({ style, mode, edges, ...rest }, ref) => {
   const insets = useSafeAreaInsets();
 
   const edgesRecord = React.useMemo(() => {
@@ -53,7 +53,10 @@ export const SafeAreaView = React.forwardRef<
   }, [edges]);
 
   const appliedStyle = React.useMemo(() => {
-    const flatStyle = StyleSheet.flatten(style) as Record<string, number>;
+    const flatStyle = (StyleSheet.flatten(style) ?? {}) as Record<
+      string,
+      number
+    >;
 
     if (mode === 'margin') {
       const {
