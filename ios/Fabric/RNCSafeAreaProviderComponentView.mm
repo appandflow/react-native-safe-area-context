@@ -106,9 +106,9 @@ using namespace facebook::react;
         .insets =
             {
                 .top = safeAreaInsets.top,
-                .left = safeAreaInsets.left,
-                .bottom = safeAreaInsets.bottom,
                 .right = safeAreaInsets.right,
+                .bottom = safeAreaInsets.bottom,
+                .left = safeAreaInsets.left,
             },
         .frame =
             {
