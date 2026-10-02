@@ -19,6 +19,7 @@ import type {
   Metrics,
 } from '../SafeArea.types';
 import { NativeSafeAreaProvider } from '../NativeSafeAreaProvider.web';
+import { SafeAreaListener } from '../SafeAreaContext';
 
 jest.mock('react-native', () => {
   const ReactActual = jest.requireActual<typeof React>('react');
@@ -29,8 +30,17 @@ jest.mock('react-native', () => {
     >(function View({ children }, ref) {
       return ReactActual.createElement('div', { ref }, children);
     }),
+    StyleSheet: { create: <T,>(styles: T): T => styles },
+    Dimensions: { get: () => ({ width: WINDOW_WIDTH, height: WINDOW_HEIGHT }) },
   };
 });
+
+// `SafeAreaContext` imports the platform-agnostic `./NativeSafeAreaProvider`,
+// which the react-native jest preset resolves to the native implementation.
+// Point it at the web one so this suite exercises the web code path.
+jest.mock('../NativeSafeAreaProvider', () =>
+  jest.requireActual('../NativeSafeAreaProvider.web'),
+);
 
 (
   globalThis as unknown as { IS_REACT_ACT_ENVIRONMENT: boolean }
@@ -117,6 +127,28 @@ function mockWindowInsets(insets: EdgeInsets) {
 
 function spyOnBoundingClientRect() {
   return jest.spyOn(Element.prototype, 'getBoundingClientRect');
+}
+
+/**
+ * Counts how many times the hidden measurement probe is attached to the
+ * document. The probe is torn down and re-attached whenever the measurement
+ * effect re-runs, so at any instant only one is present: the churn is only
+ * visible in the number of attachments.
+ */
+function trackProbeAttachments(): { count: number } {
+  const counter = { count: 0 };
+  const appendChild = document.body.appendChild.bind(document.body);
+  jest
+    .spyOn(document.body, 'appendChild')
+    .mockImplementation(<T extends Node>(node: T): T => {
+      if (
+        (node as Node as HTMLElement).style?.transitionProperty === 'padding'
+      ) {
+        counter.count += 1;
+      }
+      return appendChild(node);
+    });
+  return counter;
 }
 
 let root: Root | null = null;
@@ -280,5 +312,96 @@ describe('NativeSafeAreaProvider.web', () => {
       insets: { top: 20, bottom: 10, left: 0, right: 0 },
       frame: { x: 0, y: 0, width: 800, height: 600 },
     });
+  });
+
+  function mountRoot(): Root {
+    const newHost = document.createElement('div');
+    document.body.appendChild(newHost);
+    const newRoot = createRoot(newHost);
+    host = newHost;
+    root = newRoot;
+    return newRoot;
+  }
+
+  it('does not rebuild the measurement probe when the provider re-renders', () => {
+    const onInsetsChange = jest.fn<InsetChangeNativeCallback>();
+    const newRoot = mountRoot();
+    const probes = trackProbeAttachments();
+
+    // A fresh callback identity on every render, which is what an inline
+    // arrow in the parent produces.
+    const render = () =>
+      act(() => {
+        newRoot.render(
+          <NativeSafeAreaProvider onInsetsChange={(e) => onInsetsChange(e)} />,
+        );
+      });
+
+    render();
+    render();
+    render();
+
+    expect(probes.count).toBe(1);
+    expect(ResizeObserverMock.instances).toHaveLength(1);
+    expect(onInsetsChange).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not rebuild the measurement probe when a SafeAreaListener re-renders', () => {
+    const onChange = jest.fn();
+    const newRoot = mountRoot();
+    const probes = trackProbeAttachments();
+
+    // `onChange` is the same function on every render, so any churn comes
+    // from `SafeAreaListener` itself and not from the caller.
+    const render = () =>
+      act(() => {
+        newRoot.render(<SafeAreaListener onChange={onChange} />);
+      });
+
+    render();
+    render();
+    render();
+
+    expect(probes.count).toBe(1);
+    expect(ResizeObserverMock.instances).toHaveLength(1);
+    expect(onChange).toHaveBeenCalledTimes(1);
+  });
+
+  it('reports later changes to the most recent onInsetsChange', () => {
+    rectMock.mockReturnValue(makeRect(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT));
+    const first = jest.fn<InsetChangeNativeCallback>();
+    const second = jest.fn<InsetChangeNativeCallback>();
+    const newRoot = mountRoot();
+
+    const render = (onInsetsChange: InsetChangeNativeCallback) =>
+      act(() => {
+        newRoot.render(
+          <NativeSafeAreaProvider onInsetsChange={onInsetsChange} />,
+        );
+      });
+
+    render(first);
+    expect(first).toHaveBeenCalledTimes(1);
+
+    // Swapping the callback must not re-measure on its own.
+    render(second);
+    expect(second).not.toHaveBeenCalled();
+
+    // A genuine change must still propagate, and to the current callback.
+    rectMock.mockReturnValue(makeRect(0, 100, WINDOW_WIDTH, 668));
+    triggerResizeObservers();
+
+    expect(second).toHaveBeenCalledTimes(1);
+    expect(lastMetrics(second)).toEqual({
+      insets: {
+        top: 0,
+        bottom: WINDOW_INSETS.bottom,
+        left: WINDOW_INSETS.left,
+        right: WINDOW_INSETS.right,
+      },
+      frame: { x: 0, y: 100, width: WINDOW_WIDTH, height: 668 },
+    });
+    // The stale callback is not called again.
+    expect(first).toHaveBeenCalledTimes(1);
   });
 });
