@@ -1,0 +1,115 @@
+@font-face {
+  font-family: 'GT Maru';
+  src: url('../font/GT-Maru-Bold.ttf') format('truetype');
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Inter';
+  src: url('../font/InterVariable.woff2') format('woff2');
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'JetBrains Mono';
+  src: url('../font/JetBrainsMono-Regular.woff2') format('woff2');
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+
+:root {
+  --ifm-color-primary: #008cff;
+  --ifm-color-primary-dark: #007ee6;
+  --ifm-color-primary-darker: #0077d9;
+  --ifm-color-primary-darkest: #0062b3;
+  --ifm-color-primary-light: #1a98ff;
+  --ifm-color-primary-lighter: #26a0ff;
+  --ifm-color-primary-lightest: #4dafff;
+  --ifm-font-family-base: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --ifm-heading-font-weight: 650;
+  --ifm-font-size-base: 16px;
+  --ifm-line-height-base: 1.7;
+  --ifm-code-font-size: 90%;
+  --ifm-background-color: #fff;
+  --ifm-font-color-base: #1c2942;
+  --ifm-heading-color: #12213b;
+  --ifm-navbar-shadow: none;
+  --ifm-global-radius: 8px;
+  --ifm-footer-background-color: #f6f8fc;
+  --rr-border: #e1e6ef;
+  --rr-muted: #59677f;
+  --rr-panel: #f6f8fc;
+  --rr-subtle: #edf1f8;
+}
+
+[data-theme='dark'] {
+  --ifm-color-primary: #008cff;
+  --ifm-color-primary-dark: #007ee6;
+  --ifm-color-primary-darker: #0077d9;
+  --ifm-color-primary-darkest: #0062b3;
+  --ifm-color-primary-light: #1a98ff;
+  --ifm-color-primary-lighter: #26a0ff;
+  --ifm-color-primary-lightest: #4dafff;
+  --ifm-background-color: #101725;
+  --ifm-background-surface-color: #161f30;
+  --ifm-navbar-background-color: #101725;
+  --ifm-font-color-base: #d8e1f2;
+  --ifm-heading-color: #f0f4fc;
+  --ifm-footer-background-color: #141d2d;
+  --rr-border: #2b3850;
+  --rr-muted: #aab8d0;
+  --rr-panel: #161f30;
+  --rr-subtle: #243149;
+}
+
+.navbar {
+  border-bottom: 1px solid var(--rr-border);
+}
+.navbar__title {
+  font-size: 1rem;
+  letter-spacing: -0.03em;
+}
+.navbar__logo {
+  height: 30px;
+}
+.footer {
+  border-top: 1px solid var(--rr-border);
+}
+.footer__copyright {
+  font-size: 0.85rem;
+  color: var(--rr-muted);
+}
+.markdown h1 {
+  letter-spacing: -0.045em;
+}
+.markdown h2 {
+  letter-spacing: -0.025em;
+}
+.markdown table {
+  font-size: 0.94rem;
+}
+.theme-doc-sidebar-item-link {
+  font-size: 0.92rem;
+}
+.button {
+  font-weight: 600;
+}
+.button--primary:not(.button--outline) {
+  color: #fff;
+  background: var(--ifm-color-primary);
+  border-color: var(--ifm-color-primary);
+}
+.button--primary:not(.button--outline):hover {
+  background: var(--ifm-color-primary-dark);
+  border-color: var(--ifm-color-primary-dark);
+}
+a:focus-visible,
+button:focus-visible {
+  outline: 3px solid var(--ifm-color-primary);
+  outline-offset: 4px;
+}
