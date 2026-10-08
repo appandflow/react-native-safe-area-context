@@ -24,7 +24,7 @@ describe('InitialWindow', () => {
           width: 100,
         },
       };
-      const TurboModuleRegistry = require('react-native/Libraries/TurboModule/TurboModuleRegistry');
+      const { TurboModuleRegistry } = require('react-native');
       TurboModuleRegistry.get = jest.fn((name) => {
         if (name === 'RNCSafeAreaContext') {
           return {

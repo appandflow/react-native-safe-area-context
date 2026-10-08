@@ -58,7 +58,7 @@
   },
   "peerDependencies": {
     "react": "*",
-    "react-native": "*"
+    "react-native": ">=0.82.0"
   },
   "devDependencies": {
     "@commitlint/config-conventional": "^19.2.2",
