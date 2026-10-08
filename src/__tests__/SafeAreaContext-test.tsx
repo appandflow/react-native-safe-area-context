@@ -61,7 +61,11 @@ describe('SafeAreaContext', () => {
     expect(toJSON()).toMatchSnapshot();
     const element = await screen.findByTestId('safe-area-provider');
     act(() => {
-      element.props.onInsetsChange({
+      // The prop name on the host element depends on whether insets come from
+      // the core `onSafeAreaInsetsChange` view prop or the native provider.
+      const onInsetsChange =
+        element.props.onSafeAreaInsetsChange ?? element.props.onInsetsChange;
+      onInsetsChange({
         nativeEvent: TEST_METRICS_1,
       });
     });
