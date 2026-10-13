@@ -10,13 +10,11 @@ const config: Config = {
   favicon: 'img/favicon.ico',
 
   // Set the production url of your site here
-  url: 'https://appandflow.github.io',
-  // Set the /<baseUrl>/ pathname under which your site is served
-  // For GitHub pages deployment, it is often '/<projectName>/'
-  baseUrl: '/react-native-safe-area-context/docs/',
+  url: 'https://rnsac.appandflow.com',
+  // The docs are served under /docs/ next to the landing page in `website/`.
+  // See vercel.json at the repository root.
+  baseUrl: '/docs/',
 
-  // GitHub pages deployment config.
-  // If you aren't using GitHub pages, you don't need these.
   organizationName: 'AppAndFlow', // Usually your GitHub org/user name.
   projectName: 'react-native-safe-area-context', // Usually your repo name.
 

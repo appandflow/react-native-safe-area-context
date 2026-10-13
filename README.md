@@ -13,7 +13,7 @@ A flexible way to handle safe area, also works on Android and Web!
 
 ## Documentation
 
-Check out our [documentation site](https://appandflow.github.io/react-native-safe-area-context/).
+Check out our [documentation site](https://rnsac.appandflow.com/).
 
 ## Contributing
 

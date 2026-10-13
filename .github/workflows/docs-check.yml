@@ -7,13 +7,11 @@ on:
       - main
     paths:
       - '.github/workflows/docs-check.yml'
-      - '.github/workflows/docs-deploy.yml'
       - docs/**
       - website/**
   pull_request:
     paths:
       - '.github/workflows/docs-check.yml'
-      - '.github/workflows/docs-deploy.yml'
       - docs/**
       - website/**
 jobs:

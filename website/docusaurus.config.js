@@ -1,8 +1,8 @@
 export default {
   title: 'React Native Safe Area Context',
   tagline: 'Simplifying layout management with React Native Safe Area Context',
-  url: 'https://appandflow.github.io',
-  baseUrl: '/react-native-safe-area-context/',
+  url: 'https://rnsac.appandflow.com',
+  baseUrl: '/',
   onBrokenLinks: 'throw',
   presets: [
     ['classic', {
