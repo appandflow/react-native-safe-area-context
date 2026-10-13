@@ -35,6 +35,13 @@ export interface NativeSafeAreaProviderProps extends ViewProps {
   ref?: React.Ref<View>;
   children?: React.ReactNode;
   onInsetsChange: InsetChangeNativeCallback;
+  /**
+   * Web only, undocumented and unstable. Render children without the wrapping
+   * view. Since there is no view to measure, insets and frame fall back to
+   * window values, and `style` and `ref` have nothing to apply to. Has no
+   * effect on other platforms.
+   */
+  unstable_disableViewOnWeb?: boolean;
 }
 
 export interface NativeSafeAreaViewProps extends ViewProps {
