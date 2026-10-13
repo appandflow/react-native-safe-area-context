@@ -7,26 +7,33 @@ on:
       - main
     paths:
       - '.github/workflows/docs-check.yml'
+      - '.github/workflows/docs-deploy.yml'
       - docs/**
+      - website/**
   pull_request:
     paths:
       - '.github/workflows/docs-check.yml'
+      - '.github/workflows/docs-deploy.yml'
       - docs/**
+      - website/**
 jobs:
   build:
     if: github.repository == 'AppAndFlow/react-native-safe-area-context'
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        site: [docs, website]
     env:
-      WORKING_DIRECTORY: docs
+      WORKING_DIRECTORY: ${{ matrix.site }}
     steps:
       - uses: actions/checkout@v4
       - name: Use Node.js 22.13.0
         uses: actions/setup-node@v4
         with:
           node-version: 22.13.0
-      - name: Install docs deps
+      - name: Install site dependencies
         working-directory: ${{ env.WORKING_DIRECTORY }}
-        run: yarn install
-      - name: Build docs
+        run: yarn install --frozen-lockfile
+      - name: Build site
         working-directory: ${{ env.WORKING_DIRECTORY }}
         run: yarn build

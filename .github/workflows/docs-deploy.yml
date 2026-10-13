@@ -5,6 +5,8 @@ on:
       - main
     paths:
       - docs/**
+      - website/**
+      - '.github/workflows/docs-deploy.yml'
 
 jobs:
   publish:
@@ -14,17 +16,23 @@ jobs:
       - name: Check out
         uses: actions/checkout@v4
 
-      - name: Generate awesome content
-        run: >-
-          git config --local user.email "action@github.com"
-          && git config --local user.name "GitHub Action"
-          && cd docs
-          && yarn
-          && yarn build
+      - name: Use Node.js 22.13.0
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.13.0
+
+      - name: Build landing page and documentation
+        run: |
+          yarn --cwd website install --frozen-lockfile
+          yarn --cwd website build
+          yarn --cwd docs install --frozen-lockfile
+          yarn --cwd docs build
+          mkdir -p website/build/docs
+          cp -R docs/build/. website/build/docs/
 
       - name: Publish generated content to GitHub Pages
         uses: JamesIves/github-pages-deploy-action@releases/v3
         with:
-          FOLDER: docs/build
+          FOLDER: website/build
           BRANCH: gh-pages
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

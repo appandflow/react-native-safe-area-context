@@ -1,5 +1,5 @@
 export const docs =
-  'https://appandflow.github.io/react-native-safe-area-context/';
+  'https://appandflow.github.io/react-native-safe-area-context/docs/';
 export const github =
   'https://github.com/AppAndFlow/react-native-safe-area-context';
 export const command = 'npm install react-native-safe-area-context';
