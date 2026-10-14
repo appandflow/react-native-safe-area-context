@@ -12,8 +12,8 @@ export default function Footer() {
         </a>
       </span>
       <span aria-hidden="true">·</span>
-      <a className={styles.link} href={`${github}/blob/main/LICENSE`}>
-        <span className={styles.linkLabel}>licensed under the MIT License</span>
+      <a className={styles.licenseLink} href={`${github}/blob/main/LICENSE`}>
+        licensed under the MIT License
       </a>
     </footer>
   );
