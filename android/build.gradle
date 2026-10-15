@@ -132,4 +132,8 @@ def kotlin_version = getExtOrDefault('kotlinVersion', project.properties['RNSAC_
 dependencies {
     implementation 'com.facebook.react:react-native:+'
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+
+    testImplementation "junit:junit:4.13.2"
+    testImplementation "org.mockito.kotlin:mockito-kotlin:6.4.0"
+    testImplementation "org.robolectric:robolectric:4.17"
 }

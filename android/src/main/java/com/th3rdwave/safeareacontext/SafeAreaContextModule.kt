@@ -17,9 +17,10 @@ class SafeAreaContextModule(reactContext: ReactApplicationContext?) :
   }
 
   private fun getInitialWindowMetrics(): Map<String, Any>? {
-    val decorView = reactApplicationContext.currentActivity?.window?.decorView as ViewGroup?
+    val activity = reactApplicationContext.currentActivity
+    val decorView = activity?.window?.decorView as ViewGroup?
     val contentView = decorView?.findViewById<View>(android.R.id.content) ?: return null
-    val insets = getSafeAreaInsets(decorView)
+    val insets = getSafeAreaInsets(decorView, activity)
     val frame = getFrame(decorView, contentView)
     return if (insets == null || frame == null) {
       null
