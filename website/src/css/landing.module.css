@@ -67,13 +67,18 @@ a.attributionLink:hover {
 
 a.getStarted,
 a.getStarted:hover {
-  padding: 8px 16px;
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  height: 52px;
+  padding: 0 32px;
   line-height: var(--sac-small-line-height, 1.7);
-  font-weight: var(--sac-button-weight, 400);
+  font-weight: 500;
   border-radius: 40px;
   background: #54a0ff;
   color: #fff;
-  font-size: 12px;
+  font-size: 14px;
   text-decoration: none;
   white-space: nowrap;
 }
@@ -215,8 +220,7 @@ a.featureLink:hover {
 .copyIcon,
 .copySuccess {
   grid-area: 1 / 1;
-  transition:
-    opacity var(--ifm-transition-fast) ease,
+  transition: opacity var(--ifm-transition-fast) ease,
     transform var(--ifm-transition-fast) ease;
 }
 .copySuccess {
@@ -236,9 +240,7 @@ a.featureLink:hover {
   text-decoration-line: underline;
   text-decoration-color: transparent;
   text-underline-offset: 3px;
-  transition:
-    color 100ms ease,
-    text-decoration-color 100ms ease;
+  transition: color 100ms ease, text-decoration-color 100ms ease;
 }
 .linkLabel:hover,
 a:focus-visible .linkLabel {
@@ -388,5 +390,30 @@ a:focus-visible .linkLabel {
   .features {
     grid-column: 1;
     grid-row: 3;
+  }
+}
+
+a.licenseLink,
+a.licenseLink:hover {
+  color: #828282;
+  text-decoration: none;
+}
+
+@keyframes getStartedSquish {
+  33% {
+    transform: scale(1.02, 0.98);
+  }
+  66% {
+    transform: scale(0.99, 1.01);
+  }
+}
+
+.getStarted {
+  transform-origin: bottom center;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .getStarted:hover {
+    animation: getStartedSquish 300ms ease-out;
   }
 }
