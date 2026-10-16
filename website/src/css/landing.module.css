@@ -71,14 +71,14 @@ a.getStarted:hover {
   flex-shrink: 0;
   align-items: center;
   justify-content: center;
-  height: 52px;
-  padding: 0 32px;
+  height: auto;
+  padding: 8px 16px;
   line-height: var(--sac-small-line-height, 1.7);
   font-weight: 500;
   border-radius: 40px;
   background: #54a0ff;
   color: #fff;
-  font-size: 14px;
+  font-size: 12px;
   text-decoration: none;
   white-space: nowrap;
 }
@@ -194,8 +194,8 @@ a.featureLink:hover {
 
 .main {
   display: grid;
-  max-width: 1492px;
-  margin: 0 auto;
+  max-width: none;
+  margin: 0;
 }
 
 .features {
