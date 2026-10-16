@@ -74,16 +74,19 @@ export function NativeSafeAreaProvider({
         // in viewport coordinates and clamp the window insets to the part
         // overlapping the provider view.
         const rect = providerElement.getBoundingClientRect();
+
+        // Scrolling can move the provider beyond the viewport edges.
+        // Those offsets must not increase the window's safe area insets.
         insets = {
-          top: Math.max(0, windowInsets.top - rect.top),
+          top: Math.max(0, windowInsets.top - Math.max(0, rect.top)),
           bottom: Math.max(
             0,
-            windowInsets.bottom - (window.innerHeight - rect.bottom),
+            windowInsets.bottom - Math.max(0, window.innerHeight - rect.bottom),
           ),
-          left: Math.max(0, windowInsets.left - rect.left),
+          left: Math.max(0, windowInsets.left - Math.max(0, rect.left)),
           right: Math.max(
             0,
-            windowInsets.right - (window.innerWidth - rect.right),
+            windowInsets.right - Math.max(0, window.innerWidth - rect.right),
           ),
         };
         frame = {
