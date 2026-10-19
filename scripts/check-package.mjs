@@ -64,7 +64,8 @@ for (const entry of entries) {
     ) ||
     /^package\/(?:src|lib\/(?:commonjs|module|typescript)\/src)\/__tests__(?:\/|$)/.test(
       entry,
-    )
+    ) ||
+    /^package\/android\/src\/test(?:\/|$)/.test(entry)
   ) {
     throw new Error(`Unexpected repository-only file: ${entry}`);
   }

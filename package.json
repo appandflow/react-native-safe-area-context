@@ -19,6 +19,7 @@
     "Package.swift",
     "react-native.config.js",
     "!**/__tests__",
+    "!android/src/test",
     "!example"
   ],
   "author": "Janic Duplessis <janicduplessis@gmail.com>",
