@@ -12,6 +12,18 @@ export type Event = Readonly<{
     bottom: Double;
     left: Double;
   }>;
+  verticalCornerAdaptedInsets: Readonly<{
+    top: Double;
+    right: Double;
+    bottom: Double;
+    left: Double;
+  }>;
+  horizontalCornerAdaptedInsets: Readonly<{
+    top: Double;
+    right: Double;
+    bottom: Double;
+    left: Double;
+  }>;
   frame: Readonly<{
     x: Double;
     y: Double;

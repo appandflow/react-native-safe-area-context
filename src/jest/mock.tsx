@@ -5,6 +5,9 @@ import type {
   SafeAreaProviderProps,
   SafeAreaInsetsContext,
   SafeAreaFrameContext,
+  SafeAreaVerticalCornerAdaptedInsetsContext,
+  SafeAreaHorizontalCornerAdaptedInsetsContext,
+  UseSafeAreaInsetsOptions,
 } from '../SafeAreaContext';
 
 const MOCK_INITIAL_METRICS: Metrics = {
@@ -25,16 +28,25 @@ const MOCK_INITIAL_METRICS: Metrics = {
 const RNSafeAreaContext = jest.requireActual<{
   SafeAreaInsetsContext: typeof SafeAreaInsetsContext;
   SafeAreaFrameContext: typeof SafeAreaFrameContext;
+  SafeAreaVerticalCornerAdaptedInsetsContext: typeof SafeAreaVerticalCornerAdaptedInsetsContext;
+  SafeAreaHorizontalCornerAdaptedInsetsContext: typeof SafeAreaHorizontalCornerAdaptedInsetsContext;
 }>('react-native-safe-area-context');
 
 export default {
   ...RNSafeAreaContext,
   initialWindowMetrics: MOCK_INITIAL_METRICS,
-  useSafeAreaInsets: jest.fn(() => {
-    return (
+  useSafeAreaInsets: jest.fn((options?: UseSafeAreaInsetsOptions) => {
+    const insets =
       useContext(RNSafeAreaContext.SafeAreaInsetsContext) ??
-      MOCK_INITIAL_METRICS.insets
+      MOCK_INITIAL_METRICS.insets;
+    const cornerInsets = useContext(
+      options?.cornerAdaptation === 'horizontal'
+        ? RNSafeAreaContext.SafeAreaHorizontalCornerAdaptedInsetsContext
+        : RNSafeAreaContext.SafeAreaVerticalCornerAdaptedInsetsContext,
     );
+    return options?.cornerAdaptation != null
+      ? (cornerInsets ?? insets)
+      : insets;
   }),
   useSafeAreaFrame: jest.fn(() => {
     return (

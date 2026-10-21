@@ -3,6 +3,8 @@
 
 @implementation RNCOnInsetsChangeEvent {
   UIEdgeInsets _insets;
+  UIEdgeInsets _verticalCornerAdaptedInsets;
+  UIEdgeInsets _horizontalCornerAdaptedInsets;
   CGRect _frame;
   uint16_t _coalescingKey;
 }
@@ -13,6 +15,8 @@
 - (instancetype)initWithEventName:(NSString *)eventName
                          reactTag:(NSNumber *)reactTag
                            insets:(UIEdgeInsets)insets
+      verticalCornerAdaptedInsets:(UIEdgeInsets)verticalCornerAdaptedInsets
+    horizontalCornerAdaptedInsets:(UIEdgeInsets)horizontalCornerAdaptedInsets
                             frame:(CGRect)frame
                     coalescingKey:(uint16_t)coalescingKey
 {
@@ -23,6 +27,8 @@
     _viewTag = reactTag;
     _frame = frame;
     _insets = insets;
+    _verticalCornerAdaptedInsets = verticalCornerAdaptedInsets;
+    _horizontalCornerAdaptedInsets = horizontalCornerAdaptedInsets;
     _coalescingKey = coalescingKey;
   }
 
@@ -44,6 +50,18 @@ RCT_NOT_IMPLEMENTED(-(instancetype)init)
       @"right" : @(_insets.right),
       @"bottom" : @(_insets.bottom),
       @"left" : @(_insets.left),
+    },
+    @"verticalCornerAdaptedInsets" : @{
+      @"top" : @(_verticalCornerAdaptedInsets.top),
+      @"right" : @(_verticalCornerAdaptedInsets.right),
+      @"bottom" : @(_verticalCornerAdaptedInsets.bottom),
+      @"left" : @(_verticalCornerAdaptedInsets.left),
+    },
+    @"horizontalCornerAdaptedInsets" : @{
+      @"top" : @(_horizontalCornerAdaptedInsets.top),
+      @"right" : @(_horizontalCornerAdaptedInsets.right),
+      @"bottom" : @(_horizontalCornerAdaptedInsets.bottom),
+      @"left" : @(_horizontalCornerAdaptedInsets.left),
     },
     @"frame" : @{
       @"x" : @(_frame.origin.x),

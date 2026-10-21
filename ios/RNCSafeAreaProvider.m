@@ -14,6 +14,8 @@
 @implementation RNCSafeAreaProvider {
   id<RCTEventDispatcherProtocol> _eventDispatcher;
   UIEdgeInsets _currentSafeAreaInsets;
+  UIEdgeInsets _currentVerticalCornerAdaptedInsets;
+  UIEdgeInsets _currentHorizontalCornerAdaptedInsets;
   CGRect _currentFrame;
   BOOL _initialInsetsSent;
 }
@@ -62,6 +64,10 @@
 
 #if TARGET_OS_IPHONE
   UIEdgeInsets safeAreaInsets = self.safeAreaInsets;
+  UIEdgeInsets verticalCornerAdaptedInsets =
+      RNCSafeAreaInsetsWithCornerAdaptation(self, RNCSafeAreaCornerAdaptationVertical);
+  UIEdgeInsets horizontalCornerAdaptedInsets =
+      RNCSafeAreaInsetsWithCornerAdaptation(self, RNCSafeAreaCornerAdaptationHorizontal);
 #elif TARGET_OS_OSX
   NSEdgeInsets safeAreaInsets;
   if (@available(macOS 11.0, *)) {
@@ -69,6 +75,8 @@
   } else {
     safeAreaInsets = NSEdgeInsetsZero;
   }
+  NSEdgeInsets verticalCornerAdaptedInsets = safeAreaInsets;
+  NSEdgeInsets horizontalCornerAdaptedInsets = safeAreaInsets;
 #endif
 
   CGRect frame = [self convertRect:self.bounds toView:RNCParentViewController(self).view];
@@ -76,6 +84,10 @@
   if (_initialInsetsSent &&
 #if TARGET_OS_IPHONE
       UIEdgeInsetsEqualToEdgeInsetsWithThreshold(safeAreaInsets, _currentSafeAreaInsets, 1.0 / RCTScreenScale()) &&
+      UIEdgeInsetsEqualToEdgeInsetsWithThreshold(
+          verticalCornerAdaptedInsets, _currentVerticalCornerAdaptedInsets, 1.0 / RCTScreenScale()) &&
+      UIEdgeInsetsEqualToEdgeInsetsWithThreshold(
+          horizontalCornerAdaptedInsets, _currentHorizontalCornerAdaptedInsets, 1.0 / RCTScreenScale()) &&
 #elif TARGET_OS_OSX
       NSEdgeInsetsEqualToEdgeInsetsWithThreshold(safeAreaInsets, _currentSafeAreaInsets, 1.0 / RCTScreenScale()) &&
 #endif
@@ -84,15 +96,20 @@
   }
   _initialInsetsSent = YES;
   _currentSafeAreaInsets = safeAreaInsets;
+  _currentVerticalCornerAdaptedInsets = verticalCornerAdaptedInsets;
+  _currentHorizontalCornerAdaptedInsets = horizontalCornerAdaptedInsets;
   _currentFrame = frame;
 
   [NSNotificationCenter.defaultCenter postNotificationName:RNCSafeAreaDidChange object:self userInfo:nil];
 
-  RNCOnInsetsChangeEvent *onInsetsChangeEvent = [[RNCOnInsetsChangeEvent alloc] initWithEventName:@"onInsetsChange"
-                                                                                         reactTag:self.reactTag
-                                                                                           insets:safeAreaInsets
-                                                                                            frame:frame
-                                                                                    coalescingKey:0];
+  RNCOnInsetsChangeEvent *onInsetsChangeEvent =
+      [[RNCOnInsetsChangeEvent alloc] initWithEventName:@"onInsetsChange"
+                                               reactTag:self.reactTag
+                                                 insets:safeAreaInsets
+                            verticalCornerAdaptedInsets:verticalCornerAdaptedInsets
+                          horizontalCornerAdaptedInsets:horizontalCornerAdaptedInsets
+                                                  frame:frame
+                                          coalescingKey:0];
 
   [_eventDispatcher sendEvent:onInsetsChangeEvent];
 }

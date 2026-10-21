@@ -15,6 +15,8 @@ using namespace facebook::react;
 
 @implementation RNCSafeAreaProviderComponentView {
   UIEdgeInsets _currentSafeAreaInsets;
+  UIEdgeInsets _currentVerticalCornerAdaptedInsets;
+  UIEdgeInsets _currentHorizontalCornerAdaptedInsets;
   CGRect _currentFrame;
   BOOL _initialInsetsSent;
   BOOL _registeredNotifications;
@@ -83,11 +85,24 @@ using namespace facebook::react;
   }
 
   UIEdgeInsets safeAreaInsets = self.safeAreaInsets;
+#if TARGET_OS_IPHONE
+  UIEdgeInsets verticalCornerAdaptedInsets =
+      RNCSafeAreaInsetsWithCornerAdaptation(self, RNCSafeAreaCornerAdaptationVertical);
+  UIEdgeInsets horizontalCornerAdaptedInsets =
+      RNCSafeAreaInsetsWithCornerAdaptation(self, RNCSafeAreaCornerAdaptationHorizontal);
+#elif TARGET_OS_OSX
+  UIEdgeInsets verticalCornerAdaptedInsets = safeAreaInsets;
+  UIEdgeInsets horizontalCornerAdaptedInsets = safeAreaInsets;
+#endif
   CGRect frame = [self convertRect:self.bounds toView:RNCParentViewController(self).view];
 
   if (_initialInsetsSent &&
 #if TARGET_OS_IPHONE
       UIEdgeInsetsEqualToEdgeInsetsWithThreshold(safeAreaInsets, _currentSafeAreaInsets, 1.0 / RCTScreenScale()) &&
+      UIEdgeInsetsEqualToEdgeInsetsWithThreshold(
+          verticalCornerAdaptedInsets, _currentVerticalCornerAdaptedInsets, 1.0 / RCTScreenScale()) &&
+      UIEdgeInsetsEqualToEdgeInsetsWithThreshold(
+          horizontalCornerAdaptedInsets, _currentHorizontalCornerAdaptedInsets, 1.0 / RCTScreenScale()) &&
 #elif TARGET_OS_OSX
       NSEdgeInsetsEqualToEdgeInsetsWithThreshold(safeAreaInsets, _currentSafeAreaInsets, 1.0 / RCTScreenScale()) &&
 #endif
@@ -97,6 +112,8 @@ using namespace facebook::react;
 
   _initialInsetsSent = YES;
   _currentSafeAreaInsets = safeAreaInsets;
+  _currentVerticalCornerAdaptedInsets = verticalCornerAdaptedInsets;
+  _currentHorizontalCornerAdaptedInsets = horizontalCornerAdaptedInsets;
   _currentFrame = frame;
 
   [NSNotificationCenter.defaultCenter postNotificationName:RNCSafeAreaDidChange object:self userInfo:nil];
@@ -109,6 +126,20 @@ using namespace facebook::react;
                 .left = safeAreaInsets.left,
                 .bottom = safeAreaInsets.bottom,
                 .right = safeAreaInsets.right,
+            },
+        .verticalCornerAdaptedInsets =
+            {
+                .top = verticalCornerAdaptedInsets.top,
+                .right = verticalCornerAdaptedInsets.right,
+                .bottom = verticalCornerAdaptedInsets.bottom,
+                .left = verticalCornerAdaptedInsets.left,
+            },
+        .horizontalCornerAdaptedInsets =
+            {
+                .top = horizontalCornerAdaptedInsets.top,
+                .right = horizontalCornerAdaptedInsets.right,
+                .bottom = horizontalCornerAdaptedInsets.bottom,
+                .left = horizontalCornerAdaptedInsets.left,
             },
         .frame =
             {
@@ -140,6 +171,8 @@ using namespace facebook::react;
 {
   [super prepareForRecycle];
   _currentSafeAreaInsets = UIEdgeInsetsZero;
+  _currentVerticalCornerAdaptedInsets = UIEdgeInsetsZero;
+  _currentHorizontalCornerAdaptedInsets = UIEdgeInsetsZero;
   _currentFrame = CGRectZero;
   _initialInsetsSent = NO;
   [NSNotificationCenter.defaultCenter removeObserver:self];

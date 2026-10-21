@@ -7,12 +7,21 @@ import android.view.ViewTreeObserver
 import android.view.WindowInsets
 import com.facebook.react.views.view.ReactViewGroup
 
-typealias OnInsetsChangeHandler = (view: SafeAreaProvider, insets: EdgeInsets, frame: Rect) -> Unit
+typealias OnInsetsChangeHandler =
+    (
+        view: SafeAreaProvider,
+        insets: EdgeInsets,
+        verticalCornerAdaptedInsets: EdgeInsets,
+        horizontalCornerAdaptedInsets: EdgeInsets,
+        frame: Rect,
+    ) -> Unit
 
 class SafeAreaProvider(context: Context?) :
     ReactViewGroup(context), ViewTreeObserver.OnPreDrawListener {
   private var mInsetsChangeHandler: OnInsetsChangeHandler? = null
   private var mLastInsets: EdgeInsets? = null
+  private var mLastVerticalCornerAdaptedInsets: EdgeInsets? = null
+  private var mLastHorizontalCornerAdaptedInsets: EdgeInsets? = null
   private var mLastFrame: Rect? = null
   private val mDispatchedInsets = DispatchedWindowInsets()
 
@@ -22,9 +31,18 @@ class SafeAreaProvider(context: Context?) :
     val insetsChangeHandler = mInsetsChangeHandler ?: return
     val edgeInsets = getSafeAreaInsets(this, getDispatchedWindowInsets()) ?: return
     val frame = getFrame(rootView as ViewGroup, this) ?: return
-    if (mLastInsets != edgeInsets || mLastFrame != frame) {
-      insetsChangeHandler(this, edgeInsets, frame)
+    val verticalInsets = getCornerAdaptedInsets(this, edgeInsets, CornerAdaptation.VERTICAL)
+    val horizontalInsets = getCornerAdaptedInsets(this, edgeInsets, CornerAdaptation.HORIZONTAL)
+    if (
+        mLastInsets != edgeInsets ||
+            mLastVerticalCornerAdaptedInsets != verticalInsets ||
+            mLastHorizontalCornerAdaptedInsets != horizontalInsets ||
+            mLastFrame != frame
+    ) {
+      insetsChangeHandler(this, edgeInsets, verticalInsets, horizontalInsets, frame)
       mLastInsets = edgeInsets
+      mLastVerticalCornerAdaptedInsets = verticalInsets
+      mLastHorizontalCornerAdaptedInsets = horizontalInsets
       mLastFrame = frame
     }
   }

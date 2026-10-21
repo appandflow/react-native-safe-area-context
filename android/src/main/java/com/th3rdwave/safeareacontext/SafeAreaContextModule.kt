@@ -23,7 +23,19 @@ class SafeAreaContextModule(reactContext: ReactApplicationContext?) :
     val frame = getFrame(decorView, contentView)
     return if (insets == null || frame == null) {
       null
-    } else mapOf("insets" to edgeInsetsToJavaMap(insets), "frame" to rectToJavaMap(frame))
+    } else
+        mapOf(
+            "insets" to edgeInsetsToJavaMap(insets),
+            "verticalCornerAdaptedInsets" to
+                edgeInsetsToJavaMap(
+                    getCornerAdaptedInsets(decorView, insets, CornerAdaptation.VERTICAL)
+                ),
+            "horizontalCornerAdaptedInsets" to
+                edgeInsetsToJavaMap(
+                    getCornerAdaptedInsets(decorView, insets, CornerAdaptation.HORIZONTAL)
+                ),
+            "frame" to rectToJavaMap(frame),
+        )
   }
 
   companion object {

@@ -12,8 +12,12 @@ Object with:
 {
   frame: { x: number, y: number, width: number, height: number },
   insets: { top: number, left: number, right: number, bottom: number },
+  verticalCornerAdaptedInsets: { top: number, left: number, right: number, bottom: number },
+  horizontalCornerAdaptedInsets: { top: number, left: number, right: number, bottom: number },
 }
 ```
+
+`verticalCornerAdaptedInsets` and `horizontalCornerAdaptedInsets` are the window's insets for the `cornerAdaptation` option of [`useSafeAreaInsets`](/api/use-safe-area-insets#corneradaptation).
 
 **NOTE:** This value can be null or out of date as it is computed when the native module is created.
 

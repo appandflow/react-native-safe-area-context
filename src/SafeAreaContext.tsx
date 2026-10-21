@@ -7,6 +7,7 @@ import {
 } from 'react-native';
 import { NativeSafeAreaProvider } from './NativeSafeAreaProvider';
 import type {
+  CornerAdaptation,
   EdgeInsets,
   InsetChangedEvent,
   Metrics,
@@ -25,6 +26,20 @@ if (isDev) {
 export const SafeAreaFrameContext = React.createContext<Rect | null>(null);
 if (isDev) {
   SafeAreaFrameContext.displayName = 'SafeAreaFrameContext';
+}
+
+export const SafeAreaVerticalCornerAdaptedInsetsContext =
+  React.createContext<EdgeInsets | null>(null);
+if (isDev) {
+  SafeAreaVerticalCornerAdaptedInsetsContext.displayName =
+    'SafeAreaVerticalCornerAdaptedInsetsContext';
+}
+
+export const SafeAreaHorizontalCornerAdaptedInsetsContext =
+  React.createContext<EdgeInsets | null>(null);
+if (isDev) {
+  SafeAreaHorizontalCornerAdaptedInsetsContext.displayName =
+    'SafeAreaHorizontalCornerAdaptedInsetsContext';
 }
 
 export interface SafeAreaProviderProps extends ViewProps {
@@ -47,9 +62,27 @@ export function SafeAreaProvider({
 }: SafeAreaProviderProps) {
   const parentInsets = useParentSafeAreaInsets();
   const parentFrame = useParentSafeAreaFrame();
+  const parentVerticalInsets = React.useContext(
+    SafeAreaVerticalCornerAdaptedInsetsContext,
+  );
+  const parentHorizontalInsets = React.useContext(
+    SafeAreaHorizontalCornerAdaptedInsetsContext,
+  );
   const [insets, setInsets] = React.useState<EdgeInsets | null>(
     initialMetrics?.insets ?? initialSafeAreaInsets ?? parentInsets ?? null,
   );
+  const [verticalInsets, setVerticalInsets] = React.useState<EdgeInsets | null>(
+    initialMetrics
+      ? (initialMetrics.verticalCornerAdaptedInsets ?? initialMetrics.insets)
+      : (initialSafeAreaInsets ?? parentVerticalInsets ?? null),
+  );
+  const [horizontalInsets, setHorizontalInsets] =
+    React.useState<EdgeInsets | null>(
+      initialMetrics
+        ? (initialMetrics.horizontalCornerAdaptedInsets ??
+            initialMetrics.insets)
+        : (initialSafeAreaInsets ?? parentHorizontalInsets ?? null),
+    );
   const [frame, setFrame] = React.useState<Rect>(
     initialMetrics?.frame ??
       parentFrame ?? {
@@ -62,7 +95,12 @@ export function SafeAreaProvider({
   );
   const onInsetsChange = React.useCallback((event: InsetChangedEvent) => {
     const {
-      nativeEvent: { frame: nextFrame, insets: nextInsets },
+      nativeEvent: {
+        frame: nextFrame,
+        insets: nextInsets,
+        verticalCornerAdaptedInsets: nextVerticalInsets = nextInsets,
+        horizontalCornerAdaptedInsets: nextHorizontalInsets = nextInsets,
+      },
     } = event;
 
     setFrame((curFrame) => {
@@ -80,19 +118,11 @@ export function SafeAreaProvider({
       }
     });
 
-    setInsets((curInsets) => {
-      if (
-        !curInsets ||
-        nextInsets.bottom !== curInsets.bottom ||
-        nextInsets.left !== curInsets.left ||
-        nextInsets.right !== curInsets.right ||
-        nextInsets.top !== curInsets.top
-      ) {
-        return nextInsets;
-      } else {
-        return curInsets;
-      }
-    });
+    setInsets((curInsets) => pickInsets(curInsets, nextInsets));
+    setVerticalInsets((curInsets) => pickInsets(curInsets, nextVerticalInsets));
+    setHorizontalInsets((curInsets) =>
+      pickInsets(curInsets, nextHorizontalInsets),
+    );
   }, []);
 
   return (
@@ -105,7 +135,15 @@ export function SafeAreaProvider({
       {insets != null ? (
         <SafeAreaFrameContext.Provider value={frame}>
           <SafeAreaInsetsContext.Provider value={insets}>
-            {children}
+            <SafeAreaVerticalCornerAdaptedInsetsContext.Provider
+              value={verticalInsets ?? insets}
+            >
+              <SafeAreaHorizontalCornerAdaptedInsetsContext.Provider
+                value={horizontalInsets ?? insets}
+              >
+                {children}
+              </SafeAreaHorizontalCornerAdaptedInsetsContext.Provider>
+            </SafeAreaVerticalCornerAdaptedInsetsContext.Provider>
           </SafeAreaInsetsContext.Provider>
         </SafeAreaFrameContext.Provider>
       ) : null}
@@ -139,6 +177,23 @@ export function SafeAreaListener({
   );
 }
 
+function pickInsets(
+  curInsets: EdgeInsets | null,
+  nextInsets: EdgeInsets,
+): EdgeInsets {
+  if (
+    !curInsets ||
+    nextInsets.bottom !== curInsets.bottom ||
+    nextInsets.left !== curInsets.left ||
+    nextInsets.right !== curInsets.right ||
+    nextInsets.top !== curInsets.top
+  ) {
+    return nextInsets;
+  } else {
+    return curInsets;
+  }
+}
+
 const styles = StyleSheet.create({
   fill: { flex: 1 },
 });
@@ -154,8 +209,29 @@ function useParentSafeAreaFrame(): Rect | null {
 const NO_INSETS_ERROR =
   'No safe area value available. Make sure you are rendering `<SafeAreaProvider>` at the top of your app.';
 
-export function useSafeAreaInsets(): EdgeInsets {
-  const insets = React.useContext(SafeAreaInsetsContext);
+export interface UseSafeAreaInsetsOptions {
+  /**
+   * Return the safe area insets enlarged on the edges of this axis where the
+   * display's rounded corners reach past the regular safe area.
+   */
+  cornerAdaptation?: CornerAdaptation;
+}
+
+function getInsetsContext(cornerAdaptation: CornerAdaptation | undefined) {
+  switch (cornerAdaptation) {
+    case 'vertical':
+      return SafeAreaVerticalCornerAdaptedInsetsContext;
+    case 'horizontal':
+      return SafeAreaHorizontalCornerAdaptedInsetsContext;
+    default:
+      return SafeAreaInsetsContext;
+  }
+}
+
+export function useSafeAreaInsets(
+  options?: UseSafeAreaInsetsOptions,
+): EdgeInsets {
+  const insets = React.useContext(getInsetsContext(options?.cornerAdaptation));
   if (insets == null) {
     throw new Error(NO_INSETS_ERROR);
   }

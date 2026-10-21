@@ -15,6 +15,7 @@ class SafeAreaView(context: Context?) :
   private var mMode = SafeAreaViewMode.PADDING
   private var mInsets: EdgeInsets? = null
   private var mEdges: SafeAreaViewEdges? = null
+  private var mCornerAdaptation = CornerAdaptation.NONE
   private var mProviderView: View? = null
   private var mStateWrapper: StateWrapper? = null
   private val mDispatchedInsets = DispatchedWindowInsets()
@@ -64,12 +65,18 @@ class SafeAreaView(context: Context?) :
     updateInsets()
   }
 
+  fun setCornerAdaptation(cornerAdaptation: CornerAdaptation) {
+    mCornerAdaptation = cornerAdaptation
+    maybeUpdateInsets()
+  }
+
   private fun maybeUpdateInsets(): Boolean {
     val providerView = mProviderView ?: return false
     val dispatchedInsets =
         if (providerView is SafeAreaProvider) providerView.getDispatchedWindowInsets()
         else mDispatchedInsets.get(this)
-    val edgeInsets = getSafeAreaInsets(providerView, dispatchedInsets) ?: return false
+    val safeAreaInsets = getSafeAreaInsets(providerView, dispatchedInsets) ?: return false
+    val edgeInsets = getCornerAdaptedInsets(providerView, safeAreaInsets, mCornerAdaptation)
     if (mInsets != edgeInsets) {
       mInsets = edgeInsets
       updateInsets()

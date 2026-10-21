@@ -103,7 +103,7 @@ using namespace facebook::react;
     return;
   }
 #if TARGET_OS_IPHONE
-  UIEdgeInsets safeAreaInsets = _providerView.safeAreaInsets;
+  UIEdgeInsets safeAreaInsets = RNCSafeAreaInsetsWithCornerAdaptation(_providerView, [self cornerAdaptation]);
 
   if (UIEdgeInsetsEqualToEdgeInsetsWithThreshold(safeAreaInsets, _currentSafeAreaInsets, 1.0 / RCTScreenScale())) {
     return;
@@ -116,6 +116,18 @@ using namespace facebook::react;
 #endif
   _currentSafeAreaInsets = safeAreaInsets;
   [self updateState];
+}
+
+- (RNCSafeAreaCornerAdaptation)cornerAdaptation
+{
+  switch (std::static_pointer_cast<const RNCSafeAreaViewProps>(_props)->cornerAdaptation) {
+    case RNCSafeAreaViewCornerAdaptation::Vertical:
+      return RNCSafeAreaCornerAdaptationVertical;
+    case RNCSafeAreaViewCornerAdaptation::Horizontal:
+      return RNCSafeAreaCornerAdaptationHorizontal;
+    case RNCSafeAreaViewCornerAdaptation::None:
+      return RNCSafeAreaCornerAdaptationNone;
+  }
 }
 
 - (UIView *)findNearestProvider

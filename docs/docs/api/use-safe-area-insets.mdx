@@ -19,3 +19,27 @@ function HookComponent() {
   return <View style={{ paddingBottom: Math.max(insets.bottom, 16) }} />;
 }
 ```
+
+### Options
+
+#### `cornerAdaptation`
+
+Optional, `vertical` or `horizontal`.
+
+Returns safe area insets enlarged where the display's rounded corners reach past the regular safe area. `vertical` enlarges the top and bottom insets, `horizontal` enlarges the left and right insets. Without this option the regular insets are returned.
+
+This is useful on displays where the regular safe area does not cover the rounded corners, for example when the status bar is not along the top edge. Content laid out with the regular insets can then be clipped by the corners.
+
+```tsx
+function Header() {
+  const insets = useSafeAreaInsets({ cornerAdaptation: 'vertical' });
+
+  return <View style={{ paddingTop: insets.top }} />;
+}
+```
+
+- **iOS 26+**: uses `edgeInsets(for: .safeArea(cornerAdaptation:))` measured on the `SafeAreaProvider` view. UIKit computes the value from the receiver's position and size, so it can be smaller than the window's value for a short or narrow provider.
+- **Android 12+ (API 31)**: approximated from the rounded corners the window reports. With `vertical`, the top and bottom insets grow to where each corner's arc crosses the left and right edges of the safe area. With `horizontal`, the left and right insets grow to where each arc crosses the top and bottom edges of the safe area.
+- **Older iOS and Android versions, and web**: same as the regular insets.
+
+Components that use only the regular insets do not re-render when only the corner-adapted insets change.
