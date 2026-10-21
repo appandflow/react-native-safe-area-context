@@ -61,4 +61,20 @@ UIEdgeInsets RNCSafeAreaInsetsWithCornerAdaptation(UIView *view, RNCSafeAreaCorn
 #endif
   return view.safeAreaInsets;
 }
+
+RNCSafeAreaCornerInputs RNCSafeAreaCornerInputsMake(UIView *view, UIEdgeInsets safeAreaInsets)
+{
+  return (RNCSafeAreaCornerInputs){
+      .safeAreaInsets = safeAreaInsets,
+      .frameInWindow = [view convertRect:view.bounds toView:nil],
+      .windowFrame = view.window.frame,
+  };
+}
+
+BOOL RNCSafeAreaCornerInputsEqual(RNCSafeAreaCornerInputs inputs1, RNCSafeAreaCornerInputs inputs2)
+{
+  return UIEdgeInsetsEqualToEdgeInsets(inputs1.safeAreaInsets, inputs2.safeAreaInsets) &&
+      CGRectEqualToRect(inputs1.frameInWindow, inputs2.frameInWindow) &&
+      CGRectEqualToRect(inputs1.windowFrame, inputs2.windowFrame);
+}
 #endif

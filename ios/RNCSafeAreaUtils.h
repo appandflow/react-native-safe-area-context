@@ -26,4 +26,13 @@ RCT_EXTERN NSViewController *RNCParentViewController(NSView *view);
 #if TARGET_OS_IPHONE
 RCT_EXTERN UIEdgeInsets
 RNCSafeAreaInsetsWithCornerAdaptation(UIView *view, RNCSafeAreaCornerAdaptation cornerAdaptation);
+
+typedef struct RNCSafeAreaCornerInputs {
+  UIEdgeInsets safeAreaInsets;
+  CGRect frameInWindow;
+  CGRect windowFrame;
+} RNCSafeAreaCornerInputs;
+
+RCT_EXTERN RNCSafeAreaCornerInputs RNCSafeAreaCornerInputsMake(UIView *view, UIEdgeInsets safeAreaInsets);
+RCT_EXTERN BOOL RNCSafeAreaCornerInputsEqual(RNCSafeAreaCornerInputs inputs1, RNCSafeAreaCornerInputs inputs2);
 #endif
