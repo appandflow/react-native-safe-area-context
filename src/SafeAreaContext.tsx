@@ -8,6 +8,7 @@ import {
 import { NativeSafeAreaProvider } from './NativeSafeAreaProvider';
 import type {
   CornerAdaptation,
+  CornerAdaptedInsets,
   EdgeInsets,
   InsetChangedEvent,
   Metrics,
@@ -28,18 +29,11 @@ if (isDev) {
   SafeAreaFrameContext.displayName = 'SafeAreaFrameContext';
 }
 
-export const SafeAreaVerticalCornerAdaptedInsetsContext =
-  React.createContext<EdgeInsets | null>(null);
+export const SafeAreaCornerAdaptedInsetsContext =
+  React.createContext<CornerAdaptedInsets | null>(null);
 if (isDev) {
-  SafeAreaVerticalCornerAdaptedInsetsContext.displayName =
-    'SafeAreaVerticalCornerAdaptedInsetsContext';
-}
-
-export const SafeAreaHorizontalCornerAdaptedInsetsContext =
-  React.createContext<EdgeInsets | null>(null);
-if (isDev) {
-  SafeAreaHorizontalCornerAdaptedInsetsContext.displayName =
-    'SafeAreaHorizontalCornerAdaptedInsetsContext';
+  SafeAreaCornerAdaptedInsetsContext.displayName =
+    'SafeAreaCornerAdaptedInsetsContext';
 }
 
 export interface SafeAreaProviderProps extends ViewProps {
@@ -62,26 +56,29 @@ export function SafeAreaProvider({
 }: SafeAreaProviderProps) {
   const parentInsets = useParentSafeAreaInsets();
   const parentFrame = useParentSafeAreaFrame();
-  const parentVerticalInsets = React.useContext(
-    SafeAreaVerticalCornerAdaptedInsetsContext,
-  );
-  const parentHorizontalInsets = React.useContext(
-    SafeAreaHorizontalCornerAdaptedInsetsContext,
+  const parentCornerInsets = React.useContext(
+    SafeAreaCornerAdaptedInsetsContext,
   );
   const [insets, setInsets] = React.useState<EdgeInsets | null>(
     initialMetrics?.insets ?? initialSafeAreaInsets ?? parentInsets ?? null,
   );
-  const [verticalInsets, setVerticalInsets] = React.useState<EdgeInsets | null>(
-    initialMetrics
-      ? (initialMetrics.verticalCornerAdaptedInsets ?? initialMetrics.insets)
-      : (initialSafeAreaInsets ?? parentVerticalInsets ?? null),
-  );
-  const [horizontalInsets, setHorizontalInsets] =
-    React.useState<EdgeInsets | null>(
+  const [cornerInsets, setCornerInsets] =
+    React.useState<CornerAdaptedInsets | null>(
       initialMetrics
-        ? (initialMetrics.horizontalCornerAdaptedInsets ??
-            initialMetrics.insets)
-        : (initialSafeAreaInsets ?? parentHorizontalInsets ?? null),
+        ? {
+            vertical:
+              initialMetrics.verticalCornerAdaptedInsets ??
+              initialMetrics.insets,
+            horizontal:
+              initialMetrics.horizontalCornerAdaptedInsets ??
+              initialMetrics.insets,
+          }
+        : initialSafeAreaInsets
+          ? {
+              vertical: initialSafeAreaInsets,
+              horizontal: initialSafeAreaInsets,
+            }
+          : parentCornerInsets,
     );
   const [frame, setFrame] = React.useState<Rect>(
     initialMetrics?.frame ??
@@ -119,11 +116,32 @@ export function SafeAreaProvider({
     });
 
     setInsets((curInsets) => pickInsets(curInsets, nextInsets));
-    setVerticalInsets((curInsets) => pickInsets(curInsets, nextVerticalInsets));
-    setHorizontalInsets((curInsets) =>
-      pickInsets(curInsets, nextHorizontalInsets),
-    );
+    setCornerInsets((curInsets) => {
+      const vertical = pickInsets(
+        curInsets?.vertical ?? null,
+        nextVerticalInsets,
+      );
+      const horizontal = pickInsets(
+        curInsets?.horizontal ?? null,
+        nextHorizontalInsets,
+      );
+      if (
+        curInsets &&
+        vertical === curInsets.vertical &&
+        horizontal === curInsets.horizontal
+      ) {
+        return curInsets;
+      }
+      return { vertical, horizontal };
+    });
   }, []);
+
+  const cornerInsetsValue = React.useMemo(
+    () =>
+      cornerInsets ??
+      (insets != null ? { vertical: insets, horizontal: insets } : null),
+    [cornerInsets, insets],
+  );
 
   return (
     <NativeSafeAreaProvider
@@ -135,15 +153,11 @@ export function SafeAreaProvider({
       {insets != null ? (
         <SafeAreaFrameContext.Provider value={frame}>
           <SafeAreaInsetsContext.Provider value={insets}>
-            <SafeAreaVerticalCornerAdaptedInsetsContext.Provider
-              value={verticalInsets ?? insets}
+            <SafeAreaCornerAdaptedInsetsContext.Provider
+              value={cornerInsetsValue}
             >
-              <SafeAreaHorizontalCornerAdaptedInsetsContext.Provider
-                value={horizontalInsets ?? insets}
-              >
-                {children}
-              </SafeAreaHorizontalCornerAdaptedInsetsContext.Provider>
-            </SafeAreaVerticalCornerAdaptedInsetsContext.Provider>
+              {children}
+            </SafeAreaCornerAdaptedInsetsContext.Provider>
           </SafeAreaInsetsContext.Provider>
         </SafeAreaFrameContext.Provider>
       ) : null}
@@ -217,24 +231,24 @@ export interface UseSafeAreaInsetsOptions {
   cornerAdaptation?: CornerAdaptation;
 }
 
-function getInsetsContext(cornerAdaptation: CornerAdaptation | undefined) {
-  switch (cornerAdaptation) {
-    case 'vertical':
-      return SafeAreaVerticalCornerAdaptedInsetsContext;
-    case 'horizontal':
-      return SafeAreaHorizontalCornerAdaptedInsetsContext;
-    default:
-      return SafeAreaInsetsContext;
-  }
-}
-
 export function useSafeAreaInsets(
   options?: UseSafeAreaInsetsOptions,
 ): EdgeInsets {
+  const cornerAdaptation = options?.cornerAdaptation;
   const regularInsets = React.useContext(SafeAreaInsetsContext);
-  const insets =
-    React.useContext(getInsetsContext(options?.cornerAdaptation)) ??
-    regularInsets;
+  // Hooks must run unconditionally, so without the option this reads the
+  // regular context again instead of subscribing to the corner-adapted one.
+  const cornerInsets = React.useContext(
+    (cornerAdaptation
+      ? SafeAreaCornerAdaptedInsetsContext
+      : SafeAreaInsetsContext) as React.Context<
+      EdgeInsets | CornerAdaptedInsets | null
+    >,
+  );
+  const insets = cornerAdaptation
+    ? ((cornerInsets as CornerAdaptedInsets | null)?.[cornerAdaptation] ??
+      regularInsets)
+    : regularInsets;
   if (insets == null) {
     throw new Error(NO_INSETS_ERROR);
   }

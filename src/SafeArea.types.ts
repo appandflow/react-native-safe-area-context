@@ -24,6 +24,11 @@ export interface Rect {
   height: number;
 }
 
+export interface CornerAdaptedInsets {
+  vertical: EdgeInsets;
+  horizontal: EdgeInsets;
+}
+
 export interface Metrics {
   insets: EdgeInsets;
   frame: Rect;

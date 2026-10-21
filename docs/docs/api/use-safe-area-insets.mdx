@@ -38,8 +38,12 @@ function Header() {
 }
 ```
 
-- **iOS 26+**: uses `edgeInsets(for: .safeArea(cornerAdaptation:))` measured on the `SafeAreaProvider` view. UIKit computes the value from the receiver's position and size, so it can be smaller than the window's value for a short or narrow provider.
-- **Android 12+ (API 31)**: approximated from the rounded corners the window reports. With `vertical`, the top and bottom insets grow to where each corner's arc crosses the left and right edges of the safe area. With `horizontal`, the left and right insets grow to where each arc crosses the top and bottom edges of the safe area.
+`horizontal` is not a no-op on regular phones. An iPhone 18 Pro in portrait has no regular left or right inset, but its corners give `left: 18, right: 18`.
+
+There is no option that adapts both axes at once because UIKit's `UIViewLayoutRegionAdaptivityAxis` is a single choice of none, horizontal or vertical. If you need it, combine the two results per edge, for example `top` from `vertical` and `left` from `horizontal`.
+
+- **iOS 26+**: uses `edgeInsets(for: .safeArea(cornerAdaptation:))` measured on the `SafeAreaProvider` view. UIKit computes the value from the provider's position and size, so it can be smaller than the window's value for a short or narrow provider.
+- **Android 12+ (API 31)**: computed from the rounded corners the window reports, with the rule UIKit applies. For each corner of radius `R`, the inset is `r × (1 − √2⁄2)` with `r = min(R − max(dx, dy), width / 2, height / 2)`, where `dx` and `dy` are the provider's distances from the two screen edges meeting at that corner. The edge inset is the larger of that value and the regular inset.
 - **Older iOS and Android versions, and web**: same as the regular insets.
 
-Components that use only the regular insets do not re-render when only the corner-adapted insets change.
+Components that use only the regular insets do not re-render when only the corner-adapted insets change. Both variants are also available from `SafeAreaCornerAdaptedInsetsContext` as `{ vertical, horizontal }`.
