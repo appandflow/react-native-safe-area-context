@@ -24,18 +24,40 @@ enum class CornerAdaptation {
  * the display corner radius and `dx`, `dy` are the view's distances from the two edges meeting at
  * that corner. Vertical adaptation applies the top corners to the top inset and the bottom corners
  * to the bottom inset, horizontal applies the left and right corners to the side insets, each never
- * below the regular inset. [WindowInsets.getRoundedCorner] needs API 31, so below it the insets are
+ * below the regular inset. [corners] comes from [getRoundedCorners]; without it the insets are
  * returned unchanged.
  */
 fun getCornerAdaptedInsets(
     view: View,
     insets: EdgeInsets,
+    corners: List<RoundedCorner?>?,
     cornerAdaptation: CornerAdaptation,
 ): EdgeInsets {
-  if (cornerAdaptation == CornerAdaptation.NONE || Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
+  if (
+      cornerAdaptation == CornerAdaptation.NONE ||
+          corners == null ||
+          Build.VERSION.SDK_INT < Build.VERSION_CODES.S
+  ) {
     return insets
   }
-  return getCornerAdaptedInsetsS(view, insets, cornerAdaptation)
+  return getCornerAdaptedInsetsS(view, insets, corners, cornerAdaptation)
+}
+
+/**
+ * The display's rounded corners for [view]'s window, indexed by [RoundedCorner] position, or null
+ * before API 31 where [WindowInsets.getRoundedCorner] doesn't exist.
+ */
+fun getRoundedCorners(view: View): List<RoundedCorner?>? {
+  if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
+    return null
+  }
+  return getRoundedCornersS(view)
+}
+
+@RequiresApi(Build.VERSION_CODES.S)
+private fun getRoundedCornersS(view: View): List<RoundedCorner?>? {
+  val windowInsets = view.rootWindowInsets ?: return null
+  return List(4) { windowInsets.getRoundedCorner(it) }
 }
 
 private val ARC_45_DEGREES = 1f - sqrt(2f) / 2f
@@ -44,9 +66,9 @@ private val ARC_45_DEGREES = 1f - sqrt(2f) / 2f
 private fun getCornerAdaptedInsetsS(
     view: View,
     insets: EdgeInsets,
+    corners: List<RoundedCorner?>,
     cornerAdaptation: CornerAdaptation,
 ): EdgeInsets {
-  val windowInsets = view.rootWindowInsets ?: return insets
   val location = IntArray(2)
   view.getLocationInWindow(location)
   val left = location[0].toFloat()
@@ -56,7 +78,7 @@ private fun getCornerAdaptedInsetsS(
   val maxRadius = min(view.width, view.height) / 2f
 
   fun cornerInset(position: Int): Float {
-    val corner = windowInsets.getRoundedCorner(position) ?: return 0f
+    val corner = corners[position] ?: return 0f
     val radius = corner.radius.toFloat()
     val center = corner.center
     val dx =

@@ -2,6 +2,7 @@ package com.th3rdwave.safeareacontext
 
 import android.content.Context
 import android.os.Build
+import android.view.RoundedCorner
 import android.view.ViewGroup
 import android.view.ViewTreeObserver
 import android.view.WindowInsets
@@ -20,9 +21,8 @@ class SafeAreaProvider(context: Context?) :
     ReactViewGroup(context), ViewTreeObserver.OnPreDrawListener {
   private var mInsetsChangeHandler: OnInsetsChangeHandler? = null
   private var mLastInsets: EdgeInsets? = null
-  private var mLastVerticalCornerAdaptedInsets: EdgeInsets? = null
-  private var mLastHorizontalCornerAdaptedInsets: EdgeInsets? = null
   private var mLastFrame: Rect? = null
+  private var mLastCorners: List<RoundedCorner?>? = null
   private val mDispatchedInsets = DispatchedWindowInsets()
 
   internal fun getDispatchedWindowInsets(): WindowInsets? = mDispatchedInsets.get(this)
@@ -31,19 +31,18 @@ class SafeAreaProvider(context: Context?) :
     val insetsChangeHandler = mInsetsChangeHandler ?: return
     val edgeInsets = getSafeAreaInsets(this, getDispatchedWindowInsets()) ?: return
     val frame = getFrame(rootView as ViewGroup, this) ?: return
-    val verticalInsets = getCornerAdaptedInsets(this, edgeInsets, CornerAdaptation.VERTICAL)
-    val horizontalInsets = getCornerAdaptedInsets(this, edgeInsets, CornerAdaptation.HORIZONTAL)
-    if (
-        mLastInsets != edgeInsets ||
-            mLastVerticalCornerAdaptedInsets != verticalInsets ||
-            mLastHorizontalCornerAdaptedInsets != horizontalInsets ||
-            mLastFrame != frame
-    ) {
-      insetsChangeHandler(this, edgeInsets, verticalInsets, horizontalInsets, frame)
+    val corners = getRoundedCorners(this)
+    if (mLastInsets != edgeInsets || mLastFrame != frame || mLastCorners != corners) {
+      insetsChangeHandler(
+          this,
+          edgeInsets,
+          getCornerAdaptedInsets(this, edgeInsets, corners, CornerAdaptation.VERTICAL),
+          getCornerAdaptedInsets(this, edgeInsets, corners, CornerAdaptation.HORIZONTAL),
+          frame,
+      )
       mLastInsets = edgeInsets
-      mLastVerticalCornerAdaptedInsets = verticalInsets
-      mLastHorizontalCornerAdaptedInsets = horizontalInsets
       mLastFrame = frame
+      mLastCorners = corners
     }
   }
 

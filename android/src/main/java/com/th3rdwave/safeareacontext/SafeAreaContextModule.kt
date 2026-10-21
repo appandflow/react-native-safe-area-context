@@ -21,6 +21,7 @@ class SafeAreaContextModule(reactContext: ReactApplicationContext?) :
     val contentView = decorView?.findViewById<View>(android.R.id.content) ?: return null
     val insets = getSafeAreaInsets(decorView)
     val frame = getFrame(decorView, contentView)
+    val corners = getRoundedCorners(decorView)
     return if (insets == null || frame == null) {
       null
     } else
@@ -28,11 +29,11 @@ class SafeAreaContextModule(reactContext: ReactApplicationContext?) :
             "insets" to edgeInsetsToJavaMap(insets),
             "verticalCornerAdaptedInsets" to
                 edgeInsetsToJavaMap(
-                    getCornerAdaptedInsets(decorView, insets, CornerAdaptation.VERTICAL)
+                    getCornerAdaptedInsets(decorView, insets, corners, CornerAdaptation.VERTICAL)
                 ),
             "horizontalCornerAdaptedInsets" to
                 edgeInsetsToJavaMap(
-                    getCornerAdaptedInsets(decorView, insets, CornerAdaptation.HORIZONTAL)
+                    getCornerAdaptedInsets(decorView, insets, corners, CornerAdaptation.HORIZONTAL)
                 ),
             "frame" to rectToJavaMap(frame),
         )
