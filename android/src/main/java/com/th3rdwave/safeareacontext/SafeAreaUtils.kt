@@ -61,11 +61,32 @@ private fun getRootWindowInsetsCompat(
 ): EdgeInsets? {
   return when {
     Build.VERSION.SDK_INT >= Build.VERSION_CODES.R ->
-        getRootWindowInsetsCompatR(dispatchedInsets ?: rootView.rootWindowInsets)
+        maxInsets(
+            getRootWindowInsetsCompatR(rootView.rootWindowInsets),
+            getRootWindowInsetsCompatR(dispatchedInsets),
+        )
     Build.VERSION.SDK_INT >= Build.VERSION_CODES.M ->
-        getRootWindowInsetsCompatM(dispatchedInsets ?: rootView.rootWindowInsets)
+        maxInsets(
+            getRootWindowInsetsCompatM(rootView.rootWindowInsets),
+            getRootWindowInsetsCompatM(dispatchedInsets),
+        )
     else -> getRootWindowInsetsCompatBase(rootView)
   }
+}
+
+// Ancestors also lower the insets they dispatch without making that area safe. For example React
+// Native's translucent StatusBar sets the top inset to 0 so fitsSystemWindows adds no padding. So
+// dispatched insets can only add to the root insets.
+private fun maxInsets(rootInsets: EdgeInsets?, dispatchedInsets: EdgeInsets?): EdgeInsets? {
+  if (rootInsets == null || dispatchedInsets == null) {
+    return rootInsets
+  }
+  return EdgeInsets(
+      top = max(rootInsets.top, dispatchedInsets.top),
+      right = max(rootInsets.right, dispatchedInsets.right),
+      bottom = max(rootInsets.bottom, dispatchedInsets.bottom),
+      left = max(rootInsets.left, dispatchedInsets.left),
+  )
 }
 
 internal class DispatchedWindowInsets {
@@ -97,6 +118,7 @@ internal class DispatchedWindowInsets {
   }
 }
 
+@JvmOverloads
 fun getSafeAreaInsets(view: View, dispatchedInsets: WindowInsets? = null): EdgeInsets? {
   // The view has not been layout yet.
   if (view.height == 0) {
