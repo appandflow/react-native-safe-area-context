@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { DevSettings, View, Text, StatusBar } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import DispatchedInsetsExample from './DispatchedInsetsExample';
+import AdditionalInsetsExample from './AdditionalInsetsExample';
 import HooksExample from './HooksExample';
 import ListenerExample from './ListenerExample';
 import SafeAreaViewExample from './SafeAreaViewExample';
@@ -18,7 +18,7 @@ type Example =
   | 'listener'
   | 'react-navigation'
   | 'native-stack'
-  | 'dispatched-insets';
+  | 'additional-insets';
 
 export default function App() {
   const [currentExample, setCurrentExample] = React.useState<Example | null>(
@@ -65,8 +65,8 @@ export default function App() {
     DevSettings.addMenuItem('Show Native Stack Example', () => {
       setCurrentExample('native-stack');
     });
-    DevSettings.addMenuItem('Show Dispatched Insets Example', () => {
-      setCurrentExample('dispatched-insets');
+    DevSettings.addMenuItem('Show Additional Insets Example', () => {
+      setCurrentExample('additional-insets');
     });
   }, []);
 
@@ -90,8 +90,8 @@ export default function App() {
     case 'native-stack':
       content = <ReactNavigationNativeStackExample />;
       break;
-    case 'dispatched-insets':
-      content = <DispatchedInsetsExample />;
+    case 'additional-insets':
+      content = <AdditionalInsetsExample />;
       break;
     default:
       content = (

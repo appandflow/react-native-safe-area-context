@@ -9,6 +9,7 @@
     "ios": "react-native run-ios",
     "lint": "eslint .",
     "mkdist": "node -e \"require('node:fs').mkdirSync('dist', { recursive: true, mode: 0o755 })\"",
+    "postinstall": "patch-package",
     "start": "react-native start",
     "test": "jest"
   },
@@ -38,6 +39,7 @@
     "babel-jest": "^29.6.3",
     "eslint": "^8.19.0",
     "jest": "^29.2.1",
+    "patch-package": "8.0.0",
     "prettier": "2.8.8",
     "react-native-test-app": "^5.3.2",
     "typescript": "5.6.3"
