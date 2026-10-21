@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { DevSettings, View, Text, StatusBar } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import DispatchedInsetsExample from './DispatchedInsetsExample';
 import HooksExample from './HooksExample';
 import ListenerExample from './ListenerExample';
 import SafeAreaViewExample from './SafeAreaViewExample';
@@ -16,7 +17,8 @@ type Example =
   | 'hooks'
   | 'listener'
   | 'react-navigation'
-  | 'native-stack';
+  | 'native-stack'
+  | 'dispatched-insets';
 
 export default function App() {
   const [currentExample, setCurrentExample] = React.useState<Example | null>(
@@ -63,6 +65,9 @@ export default function App() {
     DevSettings.addMenuItem('Show Native Stack Example', () => {
       setCurrentExample('native-stack');
     });
+    DevSettings.addMenuItem('Show Dispatched Insets Example', () => {
+      setCurrentExample('dispatched-insets');
+    });
   }, []);
 
   let content: React.ReactElement<unknown>;
@@ -84,6 +89,9 @@ export default function App() {
     //   break;
     case 'native-stack':
       content = <ReactNavigationNativeStackExample />;
+      break;
+    case 'dispatched-insets':
+      content = <DispatchedInsetsExample />;
       break;
     default:
       content = (
