@@ -5,6 +5,8 @@ import android.view.RoundedCorner
 import android.view.View
 import androidx.annotation.RequiresApi
 import kotlin.math.max
+import kotlin.math.min
+import kotlin.math.roundToInt
 import kotlin.math.sqrt
 
 enum class CornerAdaptation {
@@ -14,12 +16,15 @@ enum class CornerAdaptation {
 }
 
 /**
- * Enlarges [insets] of [view] where the display's rounded corners reach past them.
+ * Enlarges [insets] of [view] where the display's rounded corners reach past them, matching UIKit's
+ * `edgeInsets(for: .safeArea(cornerAdaptation:))` on iOS 26.
  *
- * Vertical adaptation raises the top and bottom insets to where each corner's arc crosses the left
- * and right edges of the view's safe area. Horizontal adaptation raises the left and right insets
- * to where each arc crosses the top and bottom edges of the safe area. Corners are approximated by
- * the quarter circles that [WindowInsets.getRoundedCorner] reports, so before API 31 the insets are
+ * Measured on iOS 26/27 simulators, UIKit gives each corner the inset `r * (1 - √2 / 2)` (the arc's
+ * 45° point) of an effective radius `r = min(R - max(dx, dy), width / 2, height / 2)`, where `R` is
+ * the display corner radius and `dx`, `dy` are the view's distances from the two edges meeting at
+ * that corner. Vertical adaptation applies the top corners to the top inset and the bottom corners
+ * to the bottom inset, horizontal applies the left and right corners to the side insets, each never
+ * below the regular inset. [WindowInsets.getRoundedCorner] needs API 31, so below it the insets are
  * returned unchanged.
  */
 fun getCornerAdaptedInsets(
@@ -33,6 +38,8 @@ fun getCornerAdaptedInsets(
   return getCornerAdaptedInsetsS(view, insets, cornerAdaptation)
 }
 
+private val ARC_45_DEGREES = 1f - sqrt(2f) / 2f
+
 @RequiresApi(Build.VERSION_CODES.S)
 private fun getCornerAdaptedInsetsS(
     view: View,
@@ -42,70 +49,69 @@ private fun getCornerAdaptedInsetsS(
   val windowInsets = view.rootWindowInsets ?: return insets
   val location = IntArray(2)
   view.getLocationInWindow(location)
-  val viewLeft = location[0].toFloat()
-  val viewTop = location[1].toFloat()
-  val viewRight = viewLeft + view.width
-  val viewBottom = viewTop + view.height
-  val safeLeft = viewLeft + insets.left
-  val safeTop = viewTop + insets.top
-  val safeRight = viewRight - insets.right
-  val safeBottom = viewBottom - insets.bottom
+  val left = location[0].toFloat()
+  val top = location[1].toFloat()
+  val right = left + view.width
+  val bottom = top + view.height
+  val maxRadius = min(view.width, view.height) / 2f
 
-  var top = insets.top
-  var right = insets.right
-  var bottom = insets.bottom
-  var left = insets.left
-
-  for (position in
-      intArrayOf(
-          RoundedCorner.POSITION_TOP_LEFT,
-          RoundedCorner.POSITION_TOP_RIGHT,
-          RoundedCorner.POSITION_BOTTOM_RIGHT,
-          RoundedCorner.POSITION_BOTTOM_LEFT,
-      )) {
-    val corner = windowInsets.getRoundedCorner(position) ?: continue
+  fun cornerInset(position: Int): Float {
+    val corner = windowInsets.getRoundedCorner(position) ?: return 0f
     val radius = corner.radius.toFloat()
-    if (radius <= 0f) {
-      continue
-    }
-    val centerX = corner.center.x.toFloat()
-    val centerY = corner.center.y.toFloat()
-    val isLeft =
-        position == RoundedCorner.POSITION_TOP_LEFT ||
-            position == RoundedCorner.POSITION_BOTTOM_LEFT
-    val isTop =
-        position == RoundedCorner.POSITION_TOP_LEFT || position == RoundedCorner.POSITION_TOP_RIGHT
-
-    if (cornerAdaptation == CornerAdaptation.VERTICAL) {
-      val edgeX = if (isLeft) safeLeft else safeRight
-      val dx = if (isLeft) centerX - edgeX else edgeX - centerX
-      if (dx <= 0f) {
-        continue
-      }
-      val arcY = arcOffset(radius, dx)
-      if (isTop) {
-        top = max(top, centerY - arcY - viewTop)
-      } else {
-        bottom = max(bottom, viewBottom - (centerY + arcY))
-      }
-    } else {
-      val edgeY = if (isTop) safeTop else safeBottom
-      val dy = if (isTop) centerY - edgeY else edgeY - centerY
-      if (dy <= 0f) {
-        continue
-      }
-      val arcX = arcOffset(radius, dy)
-      if (isLeft) {
-        left = max(left, centerX - arcX - viewLeft)
-      } else {
-        right = max(right, viewRight - (centerX + arcX))
-      }
-    }
+    val center = corner.center
+    val dx =
+        when (position) {
+          RoundedCorner.POSITION_TOP_LEFT,
+          RoundedCorner.POSITION_BOTTOM_LEFT -> left - (center.x - radius)
+          else -> center.x + radius - right
+        }
+    val dy =
+        when (position) {
+          RoundedCorner.POSITION_TOP_LEFT,
+          RoundedCorner.POSITION_TOP_RIGHT -> top - (center.y - radius)
+          else -> center.y + radius - bottom
+        }
+    val effectiveRadius = min(radius - max(dx, dy), maxRadius)
+    return max(effectiveRadius, 0f).times(ARC_45_DEGREES).roundToInt().toFloat()
   }
 
-  return EdgeInsets(top = top, right = right, bottom = bottom, left = left)
-}
-
-private fun arcOffset(radius: Float, offset: Float): Float {
-  return sqrt(max(radius * radius - offset * offset, 0f))
+  return if (cornerAdaptation == CornerAdaptation.VERTICAL) {
+    insets.copy(
+        top =
+            max(
+                insets.top,
+                max(
+                    cornerInset(RoundedCorner.POSITION_TOP_LEFT),
+                    cornerInset(RoundedCorner.POSITION_TOP_RIGHT),
+                ),
+            ),
+        bottom =
+            max(
+                insets.bottom,
+                max(
+                    cornerInset(RoundedCorner.POSITION_BOTTOM_LEFT),
+                    cornerInset(RoundedCorner.POSITION_BOTTOM_RIGHT),
+                ),
+            ),
+    )
+  } else {
+    insets.copy(
+        left =
+            max(
+                insets.left,
+                max(
+                    cornerInset(RoundedCorner.POSITION_TOP_LEFT),
+                    cornerInset(RoundedCorner.POSITION_BOTTOM_LEFT),
+                ),
+            ),
+        right =
+            max(
+                insets.right,
+                max(
+                    cornerInset(RoundedCorner.POSITION_TOP_RIGHT),
+                    cornerInset(RoundedCorner.POSITION_BOTTOM_RIGHT),
+                ),
+            ),
+    )
+  }
 }
