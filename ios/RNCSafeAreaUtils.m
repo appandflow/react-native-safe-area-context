@@ -44,8 +44,9 @@ NSViewController *RNCParentViewController(NSView *view)
 UIEdgeInsets RNCSafeAreaInsetsWithCornerAdaptation(UIView *view, RNCSafeAreaCornerAdaptation cornerAdaptation)
 {
   // UIViewLayoutRegion is only declared by the iOS 26 SDK and later.
-#if defined(__IPHONE_26_0) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_26_0
-  if (@available(iOS 26.0, tvOS 26.0, *)) {
+#if (defined(__IPHONE_26_0) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_26_0) || \
+    (defined(__TVOS_26_0) && __TV_OS_VERSION_MAX_ALLOWED >= __TVOS_26_0)
+  if (@available(iOS 26.0, tvOS 26.0, visionOS 26.0, *)) {
     switch (cornerAdaptation) {
       case RNCSafeAreaCornerAdaptationVertical:
         return [view edgeInsetsForLayoutRegion:[UIViewLayoutRegion safeAreaLayoutRegionWithCornerAdaptation:

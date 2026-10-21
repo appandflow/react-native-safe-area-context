@@ -231,7 +231,10 @@ function getInsetsContext(cornerAdaptation: CornerAdaptation | undefined) {
 export function useSafeAreaInsets(
   options?: UseSafeAreaInsetsOptions,
 ): EdgeInsets {
-  const insets = React.useContext(getInsetsContext(options?.cornerAdaptation));
+  const regularInsets = React.useContext(SafeAreaInsetsContext);
+  const insets =
+    React.useContext(getInsetsContext(options?.cornerAdaptation)) ??
+    regularInsets;
   if (insets == null) {
     throw new Error(NO_INSETS_ERROR);
   }

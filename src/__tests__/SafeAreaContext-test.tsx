@@ -4,6 +4,7 @@ import * as React from 'react';
 import { Text, View } from 'react-native';
 import type { CornerAdaptation, Metrics } from '../SafeArea.types';
 import {
+  SafeAreaInsetsContext,
   SafeAreaProvider,
   useSafeAreaFrame,
   useSafeAreaInsets,
@@ -243,6 +244,16 @@ describe('SafeAreaContext', () => {
         right: 84,
         bottom: 34,
       });
+    });
+
+    it('falls back to the regular insets under a bare insets context', () => {
+      render(
+        <SafeAreaInsetsContext.Provider value={TEST_METRICS_1.insets}>
+          <PrintAllCornerInsets />
+        </SafeAreaInsetsContext.Provider>,
+      );
+      expect(readInsets('vertical')).toEqual(TEST_METRICS_1.insets);
+      expect(readInsets('horizontal')).toEqual(TEST_METRICS_1.insets);
     });
 
     it('uses parent variants when available', () => {

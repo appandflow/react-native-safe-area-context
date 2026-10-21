@@ -128,6 +128,7 @@ using namespace facebook::react;
     case RNCSafeAreaViewCornerAdaptation::None:
       return RNCSafeAreaCornerAdaptationNone;
   }
+  return RNCSafeAreaCornerAdaptationNone;
 }
 
 - (UIView *)findNearestProvider
