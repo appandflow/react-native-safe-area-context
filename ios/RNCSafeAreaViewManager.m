@@ -1,5 +1,6 @@
 #import "RNCSafeAreaViewManager.h"
 
+#import "RNCSafeAreaCornerAdaptation.h"
 #import "RNCSafeAreaShadowView.h"
 #import "RNCSafeAreaView.h"
 #import "RNCSafeAreaViewEdges.h"
@@ -25,5 +26,6 @@ RCT_EXPORT_MODULE(RNCSafeAreaView)
 
 RCT_EXPORT_VIEW_PROPERTY(mode, RNCSafeAreaViewMode)
 RCT_EXPORT_VIEW_PROPERTY(edges, RNCSafeAreaViewEdges)
+RCT_EXPORT_VIEW_PROPERTY(cornerAdaptation, RNCSafeAreaCornerAdaptation)
 
 @end

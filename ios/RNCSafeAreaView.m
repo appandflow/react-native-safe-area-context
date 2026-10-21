@@ -18,6 +18,7 @@
 #endif
   RNCSafeAreaViewMode _mode;
   RNCSafeAreaViewEdges _edges;
+  RNCSafeAreaCornerAdaptation _cornerAdaptation;
   __weak RNCSafeAreaProvider *_Nullable _providerView;
 }
 
@@ -111,7 +112,7 @@ RCT_NOT_IMPLEMENTED(-(instancetype)initWithFrame : (CGRect)frame)
     return;
   }
 #if TARGET_OS_IPHONE
-  UIEdgeInsets safeAreaInsets = _providerView.safeAreaInsets;
+  UIEdgeInsets safeAreaInsets = RNCSafeAreaInsetsWithCornerAdaptation(_providerView, _cornerAdaptation);
   if (UIEdgeInsetsEqualToEdgeInsetsWithThreshold(safeAreaInsets, _currentSafeAreaInsets, 1.0 / RCTScreenScale())) {
     return;
   }
@@ -163,6 +164,12 @@ RCT_NOT_IMPLEMENTED(-(instancetype)initWithFrame : (CGRect)frame)
 {
   _edges = edges;
   [self updateLocalData];
+}
+
+- (void)setCornerAdaptation:(RNCSafeAreaCornerAdaptation)cornerAdaptation
+{
+  _cornerAdaptation = cornerAdaptation;
+  [self invalidateSafeAreaInsets];
 }
 
 @end

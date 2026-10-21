@@ -6,6 +6,7 @@
 #import <AppKit/AppKit.h>
 typedef NSView UIView;
 #endif
+#import "RNCSafeAreaCornerAdaptation.h"
 
 extern NSString *const RNCSafeAreaDidChange;
 
@@ -20,4 +21,18 @@ NSEdgeInsetsEqualToEdgeInsetsWithThreshold(NSEdgeInsets insets1, NSEdgeInsets in
 RCT_EXTERN UIViewController *RNCParentViewController(UIView *view);
 #elif TARGET_OS_OSX
 RCT_EXTERN NSViewController *RNCParentViewController(NSView *view);
+#endif
+
+#if TARGET_OS_IPHONE
+RCT_EXTERN UIEdgeInsets
+RNCSafeAreaInsetsWithCornerAdaptation(UIView *view, RNCSafeAreaCornerAdaptation cornerAdaptation);
+
+typedef struct RNCSafeAreaCornerInputs {
+  UIEdgeInsets safeAreaInsets;
+  CGRect frameInWindow;
+  CGRect windowFrame;
+} RNCSafeAreaCornerInputs;
+
+RCT_EXTERN RNCSafeAreaCornerInputs RNCSafeAreaCornerInputsMake(UIView *view, UIEdgeInsets safeAreaInsets);
+RCT_EXTERN BOOL RNCSafeAreaCornerInputsEqual(RNCSafeAreaCornerInputs inputs1, RNCSafeAreaCornerInputs inputs2);
 #endif

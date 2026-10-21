@@ -2,6 +2,7 @@ import * as React from 'react';
 import { DevSettings, View, Text, StatusBar } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import AdditionalInsetsExample from './AdditionalInsetsExample';
+import CornerAdaptationExample from './CornerAdaptationExample';
 import HooksExample from './HooksExample';
 import ListenerExample from './ListenerExample';
 import SafeAreaViewExample from './SafeAreaViewExample';
@@ -16,6 +17,7 @@ type Example =
   | 'safe-area-view-edges'
   | 'hooks'
   | 'listener'
+  | 'corner-adaptation'
   | 'react-navigation'
   | 'native-stack'
   | 'additional-insets';
@@ -59,6 +61,9 @@ export default function App() {
     DevSettings.addMenuItem('Show Listener Example', () => {
       setCurrentExample('listener');
     });
+    DevSettings.addMenuItem('Show Corner Adaptation Example', () => {
+      setCurrentExample('corner-adaptation');
+    });
     DevSettings.addMenuItem('Show React Navigation Example', () => {
       setCurrentExample('react-navigation');
     });
@@ -83,6 +88,9 @@ export default function App() {
       break;
     case 'listener':
       content = <ListenerExample />;
+      break;
+    case 'corner-adaptation':
+      content = <CornerAdaptationExample />;
       break;
     // case 'react-navigation':
     //   content = <ReactNavigationExample />;

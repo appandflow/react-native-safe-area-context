@@ -55,3 +55,13 @@ This can be useful for example to create a safe area aware separator component:
 ```tsx
 <SafeAreaView mode="margin" style={{ height: 1, backgroundColor: '#eee' }} />
 ```
+
+#### `cornerAdaptation`
+
+Optional, `vertical` or `horizontal`.
+
+Applies the corner-adapted safe area insets instead of the regular ones. See [`useSafeAreaInsets`](/api/use-safe-area-insets#corneradaptation) for how they are computed. Like the regular insets, they are measured natively on the nearest `SafeAreaProvider`.
+
+```tsx
+<SafeAreaView edges={['top', 'left', 'right']} cornerAdaptation="vertical" />
+```

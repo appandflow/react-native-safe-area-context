@@ -10,6 +10,8 @@ internal class InsetsChangeEvent(
     @Suppress("UNUSED_PARAMETER") surfaceId: Int,
     viewTag: Int,
     private val mInsets: EdgeInsets,
+    private val mVerticalCornerAdaptedInsets: EdgeInsets,
+    private val mHorizontalCornerAdaptedInsets: EdgeInsets,
     private val mFrame: Rect,
     // New ctor is only available in RN 0.65.
 ) : Event<InsetsChangeEvent>(viewTag) {
@@ -19,6 +21,11 @@ internal class InsetsChangeEvent(
   override fun dispatch(rctEventEmitter: RCTEventEmitter) {
     val event = Arguments.createMap()
     event.putMap("insets", edgeInsetsToJsMap(mInsets))
+    event.putMap("verticalCornerAdaptedInsets", edgeInsetsToJsMap(mVerticalCornerAdaptedInsets))
+    event.putMap(
+        "horizontalCornerAdaptedInsets",
+        edgeInsetsToJsMap(mHorizontalCornerAdaptedInsets),
+    )
     event.putMap("frame", rectToJsMap(mFrame))
     rctEventEmitter.receiveEvent(viewTag, eventName, event)
   }

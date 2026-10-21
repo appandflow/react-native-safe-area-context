@@ -35,8 +35,8 @@ function getEdgeValue(
 export const SafeAreaView = React.forwardRef<
   NativeSafeAreaViewInstance,
   NativeSafeAreaViewProps
->(({ style = {}, mode, edges, ...rest }, ref) => {
-  const insets = useSafeAreaInsets();
+>(({ style = {}, mode, edges, cornerAdaptation, ...rest }, ref) => {
+  const insets = useSafeAreaInsets({ cornerAdaptation });
 
   const edgesRecord = React.useMemo(() => {
     if (edges == null) {

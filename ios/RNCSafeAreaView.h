@@ -6,6 +6,7 @@
 #import <AppKit/AppKit.h>
 #endif
 
+#import "RNCSafeAreaCornerAdaptation.h"
 #import "RNCSafeAreaViewEdges.h"
 #import "RNCSafeAreaViewMode.h"
 
@@ -19,6 +20,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property (nonatomic, assign) RNCSafeAreaViewMode mode;
 @property (nonatomic, assign) RNCSafeAreaViewEdges edges;
+@property (nonatomic, assign) RNCSafeAreaCornerAdaptation cornerAdaptation;
 
 @end
 
