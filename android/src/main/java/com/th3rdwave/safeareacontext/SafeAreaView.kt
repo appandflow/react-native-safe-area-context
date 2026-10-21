@@ -1,8 +1,10 @@
 package com.th3rdwave.safeareacontext
 
 import android.content.Context
+import android.os.Build
 import android.view.View
 import android.view.ViewTreeObserver
+import android.view.WindowInsets
 import com.facebook.react.bridge.Arguments
 import com.facebook.react.uimanager.StateWrapper
 import com.facebook.react.uimanager.UIManagerModule
@@ -15,6 +17,7 @@ class SafeAreaView(context: Context?) :
   private var mEdges: SafeAreaViewEdges? = null
   private var mProviderView: View? = null
   private var mStateWrapper: StateWrapper? = null
+  private val mDispatchedInsets = DispatchedWindowInsets()
 
   fun getStateWrapper(): StateWrapper? {
     return mStateWrapper
@@ -63,7 +66,10 @@ class SafeAreaView(context: Context?) :
 
   private fun maybeUpdateInsets(): Boolean {
     val providerView = mProviderView ?: return false
-    val edgeInsets = getSafeAreaInsets(providerView) ?: return false
+    val dispatchedInsets =
+        if (providerView is SafeAreaProvider) providerView.getDispatchedWindowInsets()
+        else mDispatchedInsets.get(this)
+    val edgeInsets = getSafeAreaInsets(providerView, dispatchedInsets) ?: return false
     if (mInsets != edgeInsets) {
       mInsets = edgeInsets
       updateInsets()
@@ -87,6 +93,9 @@ class SafeAreaView(context: Context?) :
     super.onAttachedToWindow()
     mProviderView = findProvider()
     mProviderView?.viewTreeObserver?.addOnPreDrawListener(this)
+    if (mProviderView === this && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+      requestApplyInsets()
+    }
     maybeUpdateInsets()
   }
 
@@ -94,6 +103,12 @@ class SafeAreaView(context: Context?) :
     super.onDetachedFromWindow()
     mProviderView?.viewTreeObserver?.removeOnPreDrawListener(this)
     mProviderView = null
+    mDispatchedInsets.clear()
+  }
+
+  override fun dispatchApplyWindowInsets(insets: WindowInsets): WindowInsets {
+    mDispatchedInsets.update(this, insets)
+    return super.dispatchApplyWindowInsets(insets)
   }
 
   override fun onPreDraw(): Boolean {
