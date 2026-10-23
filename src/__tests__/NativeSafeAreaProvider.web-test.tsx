@@ -13,10 +13,12 @@ import {
 import * as React from 'react';
 import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
+import type { View } from 'react-native';
 import type {
   EdgeInsets,
   InsetChangeNativeCallback,
   Metrics,
+  NativeSafeAreaProviderProps,
 } from '../SafeArea.types';
 import { NativeSafeAreaProvider } from '../NativeSafeAreaProvider.web';
 
@@ -123,12 +125,17 @@ let root: Root | null = null;
 let host: HTMLElement | null = null;
 let rectMock: ReturnType<typeof spyOnBoundingClientRect>;
 
-function mountProvider(onInsetsChange: InsetChangeNativeCallback) {
+function mountProvider(
+  onInsetsChange: InsetChangeNativeCallback,
+  props?: Partial<NativeSafeAreaProviderProps>,
+) {
   const newHost = document.createElement('div');
   document.body.appendChild(newHost);
   const newRoot = createRoot(newHost);
   act(() => {
-    newRoot.render(<NativeSafeAreaProvider onInsetsChange={onInsetsChange} />);
+    newRoot.render(
+      <NativeSafeAreaProvider onInsetsChange={onInsetsChange} {...props} />,
+    );
   });
   root = newRoot;
   host = newHost;
@@ -279,6 +286,67 @@ describe('NativeSafeAreaProvider.web', () => {
     expect(lastMetrics(onInsetsChange)).toEqual({
       insets: { top: 20, bottom: 10, left: 0, right: 0 },
       frame: { x: 0, y: 0, width: 800, height: 600 },
+    });
+  });
+
+  describe('unstable_disableViewOnWeb', () => {
+    it('wraps children in a view by default', () => {
+      const onInsetsChange = jest.fn<InsetChangeNativeCallback>();
+      mountProvider(onInsetsChange, { children: <span id="child" /> });
+      expect(host?.innerHTML).toBe('<div><span id="child"></span></div>');
+    });
+
+    it('renders children without a wrapping element when enabled', () => {
+      const onInsetsChange = jest.fn<InsetChangeNativeCallback>();
+      mountProvider(onInsetsChange, {
+        unstable_disableViewOnWeb: true,
+        children: <span id="child" />,
+      });
+      expect(host?.innerHTML).toBe('<span id="child"></span>');
+    });
+
+    it('attaches ref to the wrapping view by default', () => {
+      const onInsetsChange = jest.fn<InsetChangeNativeCallback>();
+      const ref = React.createRef<View>();
+      mountProvider(onInsetsChange, { ref, children: <span id="child" /> });
+      expect(ref.current).not.toBeNull();
+    });
+
+    it('leaves ref null when enabled, since there is no view to attach', () => {
+      const onInsetsChange = jest.fn<InsetChangeNativeCallback>();
+      const ref = React.createRef<View>();
+      mountProvider(onInsetsChange, {
+        ref,
+        unstable_disableViewOnWeb: true,
+        children: <span id="child" />,
+      });
+      expect(ref.current).toBeNull();
+    });
+
+    it('reports window insets and frame when enabled', () => {
+      // Element rects are still measurable, but there is no provider view to
+      // measure, so metrics come from the window rather than from this rect.
+      rectMock.mockReturnValue(makeRect(20, 30, 200, 300));
+      const onInsetsChange = jest.fn<InsetChangeNativeCallback>();
+      mountProvider(onInsetsChange, { unstable_disableViewOnWeb: true });
+      expect(lastMetrics(onInsetsChange)).toEqual({
+        insets: WINDOW_INSETS,
+        frame: { x: 0, y: 0, width: WINDOW_WIDTH, height: WINDOW_HEIGHT },
+      });
+    });
+
+    it('keeps reporting window metrics on resize when enabled', () => {
+      const onInsetsChange = jest.fn<InsetChangeNativeCallback>();
+      mountProvider(onInsetsChange, { unstable_disableViewOnWeb: true });
+      setWindowDimensions(800, 600);
+      mockWindowInsets({ top: 20, bottom: 10, left: 0, right: 0 });
+      act(() => {
+        window.dispatchEvent(new Event('resize'));
+      });
+      expect(lastMetrics(onInsetsChange)).toEqual({
+        insets: { top: 20, bottom: 10, left: 0, right: 0 },
+        frame: { x: 0, y: 0, width: 800, height: 600 },
+      });
     });
   });
 });
