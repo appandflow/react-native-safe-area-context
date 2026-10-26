@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://rnsac.appandflow.com/sitemap.xml
+Sitemap: https://rnsac.appandflow.com/docs/sitemap.xml
