@@ -14,16 +14,16 @@ export interface Spec extends TurboModule {
         left: CodegenTypes.Double;
       };
       verticalCornerAdaptedInsets: {
-        top: Double;
-        right: Double;
-        bottom: Double;
-        left: Double;
+        top: CodegenTypes.Double;
+        right: CodegenTypes.Double;
+        bottom: CodegenTypes.Double;
+        left: CodegenTypes.Double;
       };
       horizontalCornerAdaptedInsets: {
-        top: Double;
-        right: Double;
-        bottom: Double;
-        left: Double;
+        top: CodegenTypes.Double;
+        right: CodegenTypes.Double;
+        bottom: CodegenTypes.Double;
+        left: CodegenTypes.Double;
       };
       frame: {
         x: CodegenTypes.Double;

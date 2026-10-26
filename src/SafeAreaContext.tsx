@@ -37,7 +37,7 @@ if (isDev) {
 }
 
 export interface SafeAreaProviderProps extends ViewProps {
-  ref?: React.Ref<View>;
+  ref?: React.Ref<React.ComponentRef<typeof View>>;
   children?: React.ReactNode;
   initialMetrics?: Metrics | null;
   /**

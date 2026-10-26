@@ -48,7 +48,7 @@ export type InsetChangedEvent = NativeSyntheticEvent<Metrics>;
 export type InsetChangeNativeCallback = (event: InsetChangedEvent) => void;
 
 export interface NativeSafeAreaProviderProps extends ViewProps {
-  ref?: React.Ref<View>;
+  ref?: React.Ref<React.ComponentRef<typeof View>>;
   children?: React.ReactNode;
   onInsetsChange: InsetChangeNativeCallback;
 }

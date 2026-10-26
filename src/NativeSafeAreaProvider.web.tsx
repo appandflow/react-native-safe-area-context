@@ -21,7 +21,7 @@ export function NativeSafeAreaProvider({
   const viewRef = React.useRef<React.ComponentRef<typeof View>>(null);
 
   const setRef = React.useCallback(
-    (view: View | null) => {
+    (view: React.ComponentRef<typeof View> | null) => {
       viewRef.current = view;
 
       if (typeof ref === 'function') {
