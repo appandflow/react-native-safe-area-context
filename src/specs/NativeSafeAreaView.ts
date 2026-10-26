@@ -10,6 +10,7 @@ export interface NativeProps extends ViewProps {
     bottom: string;
     left: string;
   }>;
+  cornerAdaptation?: WithDefault<'none' | 'vertical' | 'horizontal', 'none'>;
 }
 
 export default codegenNativeComponent<NativeProps>('RNCSafeAreaView', {

@@ -10,6 +10,18 @@ export interface Spec extends TurboModule {
         bottom: Double;
         left: Double;
       };
+      verticalCornerAdaptedInsets: {
+        top: Double;
+        right: Double;
+        bottom: Double;
+        left: Double;
+      };
+      horizontalCornerAdaptedInsets: {
+        top: Double;
+        right: Double;
+        bottom: Double;
+        left: Double;
+      };
       frame: {
         x: Double;
         y: Double;

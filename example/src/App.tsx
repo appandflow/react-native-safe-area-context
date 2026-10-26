@@ -1,6 +1,8 @@
 import * as React from 'react';
 import { DevSettings, View, Text, StatusBar } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import AdditionalInsetsExample from './AdditionalInsetsExample';
+import CornerAdaptationExample from './CornerAdaptationExample';
 import HooksExample from './HooksExample';
 import ListenerExample from './ListenerExample';
 import SafeAreaViewExample from './SafeAreaViewExample';
@@ -15,8 +17,10 @@ type Example =
   | 'safe-area-view-edges'
   | 'hooks'
   | 'listener'
+  | 'corner-adaptation'
   | 'react-navigation'
-  | 'native-stack';
+  | 'native-stack'
+  | 'additional-insets';
 
 export default function App() {
   const [currentExample, setCurrentExample] = React.useState<Example | null>(
@@ -57,11 +61,17 @@ export default function App() {
     DevSettings.addMenuItem('Show Listener Example', () => {
       setCurrentExample('listener');
     });
+    DevSettings.addMenuItem('Show Corner Adaptation Example', () => {
+      setCurrentExample('corner-adaptation');
+    });
     DevSettings.addMenuItem('Show React Navigation Example', () => {
       setCurrentExample('react-navigation');
     });
     DevSettings.addMenuItem('Show Native Stack Example', () => {
       setCurrentExample('native-stack');
+    });
+    DevSettings.addMenuItem('Show Additional Insets Example', () => {
+      setCurrentExample('additional-insets');
     });
   }, []);
 
@@ -79,11 +89,17 @@ export default function App() {
     case 'listener':
       content = <ListenerExample />;
       break;
+    case 'corner-adaptation':
+      content = <CornerAdaptationExample />;
+      break;
     // case 'react-navigation':
     //   content = <ReactNavigationExample />;
     //   break;
     case 'native-stack':
       content = <ReactNavigationNativeStackExample />;
+      break;
+    case 'additional-insets':
+      content = <AdditionalInsetsExample />;
       break;
     default:
       content = (

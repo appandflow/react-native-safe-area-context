@@ -1,8 +1,12 @@
 package com.th3rdwave.safeareacontext
 
 import android.content.Context
+import android.os.Build
+import android.view.RoundedCorner
 import android.view.View
+import android.view.ViewGroup
 import android.view.ViewTreeObserver
+import android.view.WindowInsets
 import com.facebook.react.bridge.Arguments
 import com.facebook.react.uimanager.StateWrapper
 import com.facebook.react.uimanager.UIManagerModule
@@ -13,8 +17,13 @@ class SafeAreaView(context: Context?) :
   private var mMode = SafeAreaViewMode.PADDING
   private var mInsets: EdgeInsets? = null
   private var mEdges: SafeAreaViewEdges? = null
+  private var mCornerAdaptation = CornerAdaptation.NONE
+  private var mLastSafeAreaInsets: EdgeInsets? = null
+  private var mLastProviderFrame: Rect? = null
+  private var mLastCorners: List<RoundedCorner?>? = null
   private var mProviderView: View? = null
   private var mStateWrapper: StateWrapper? = null
+  private val mDispatchedInsets = DispatchedWindowInsets()
 
   fun getStateWrapper(): StateWrapper? {
     return mStateWrapper
@@ -61,9 +70,36 @@ class SafeAreaView(context: Context?) :
     updateInsets()
   }
 
+  fun setCornerAdaptation(cornerAdaptation: CornerAdaptation) {
+    mCornerAdaptation = cornerAdaptation
+    mLastSafeAreaInsets = null
+    maybeUpdateInsets()
+  }
+
   private fun maybeUpdateInsets(): Boolean {
     val providerView = mProviderView ?: return false
-    val edgeInsets = getSafeAreaInsets(providerView) ?: return false
+    val dispatchedInsets =
+        if (providerView is SafeAreaProvider) providerView.getDispatchedWindowInsets()
+        else mDispatchedInsets.get(this)
+    val safeAreaInsets = getSafeAreaInsets(providerView, dispatchedInsets) ?: return false
+    val edgeInsets: EdgeInsets
+    if (mCornerAdaptation == CornerAdaptation.NONE) {
+      edgeInsets = safeAreaInsets
+    } else {
+      val frame = getFrame(providerView.rootView as ViewGroup, providerView) ?: return false
+      val corners = getRoundedCorners(providerView)
+      if (
+          mLastSafeAreaInsets == safeAreaInsets &&
+              mLastProviderFrame == frame &&
+              mLastCorners == corners
+      ) {
+        return false
+      }
+      mLastSafeAreaInsets = safeAreaInsets
+      mLastProviderFrame = frame
+      mLastCorners = corners
+      edgeInsets = getCornerAdaptedInsets(providerView, safeAreaInsets, corners, mCornerAdaptation)
+    }
     if (mInsets != edgeInsets) {
       mInsets = edgeInsets
       updateInsets()
@@ -87,6 +123,9 @@ class SafeAreaView(context: Context?) :
     super.onAttachedToWindow()
     mProviderView = findProvider()
     mProviderView?.viewTreeObserver?.addOnPreDrawListener(this)
+    if (mProviderView === this && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+      requestApplyInsets()
+    }
     maybeUpdateInsets()
   }
 
@@ -94,6 +133,13 @@ class SafeAreaView(context: Context?) :
     super.onDetachedFromWindow()
     mProviderView?.viewTreeObserver?.removeOnPreDrawListener(this)
     mProviderView = null
+    mLastSafeAreaInsets = null
+    mDispatchedInsets.clear()
+  }
+
+  override fun dispatchApplyWindowInsets(insets: WindowInsets): WindowInsets {
+    mDispatchedInsets.update(this, insets)
+    return super.dispatchApplyWindowInsets(insets)
   }
 
   override fun onPreDraw(): Boolean {
