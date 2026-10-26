@@ -20,6 +20,17 @@ class SafeAreaViewManager : ReactViewManager() {
 
   @ReactProp(name = "edges") fun setEdges(view: SafeAreaView, edges: ReadableMap?) = Unit
 
+  @ReactProp(name = "cornerAdaptation")
+  fun setCornerAdaptation(view: SafeAreaView, cornerAdaptation: String?) {
+    view.setCornerAdaptation(
+        when (cornerAdaptation) {
+          "vertical" -> CornerAdaptation.VERTICAL
+          "horizontal" -> CornerAdaptation.HORIZONTAL
+          else -> CornerAdaptation.NONE
+        }
+    )
+  }
+
   override fun updateState(
       view: ReactViewGroup,
       props: ReactStylesDiffMap?,

@@ -58,4 +58,17 @@ describe('SafeAreaView', () => {
     );
     expect(toJSON()).toMatchSnapshot();
   });
+
+  it('passes cornerAdaptation to the native view', () => {
+    const { toJSON } = render(
+      <SafeAreaProvider initialMetrics={INITIAL_METRICS}>
+        <SafeAreaView cornerAdaptation="vertical">
+          <View />
+        </SafeAreaView>
+      </SafeAreaProvider>,
+    );
+    expect(toJSON()).toMatchObject({
+      children: [{ props: { cornerAdaptation: 'vertical' } }],
+    });
+  });
 });
