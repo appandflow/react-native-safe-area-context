@@ -1,0 +1,8 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": null,
+  "installCommand": "yarn --cwd website install --frozen-lockfile && yarn --cwd docs install --frozen-lockfile",
+  "buildCommand": "yarn --cwd website build && yarn --cwd docs build && mkdir -p website/build/docs && cp -R docs/build/. website/build/docs/",
+  "outputDirectory": "website/build",
+  "ignoreCommand": "git diff --quiet HEAD^ HEAD -- website docs vercel.json"
+}

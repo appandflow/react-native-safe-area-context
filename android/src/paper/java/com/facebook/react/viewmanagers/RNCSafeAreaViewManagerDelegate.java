@@ -34,6 +34,9 @@ public class RNCSafeAreaViewManagerDelegate<
       case "edges":
         mViewManager.setEdges(view, (ReadableMap) value);
         break;
+      case "cornerAdaptation":
+        mViewManager.setCornerAdaptation(view, (String) value);
+        break;
       default:
         super.setProperty(view, propName, value);
     }

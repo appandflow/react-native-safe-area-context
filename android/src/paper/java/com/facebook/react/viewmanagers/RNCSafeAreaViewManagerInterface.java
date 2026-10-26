@@ -17,4 +17,6 @@ public interface RNCSafeAreaViewManagerInterface<T extends View> {
   void setMode(T view, @Nullable String value);
 
   void setEdges(T view, @Nullable ReadableMap value);
+
+  void setCornerAdaptation(T view, @Nullable String value);
 }

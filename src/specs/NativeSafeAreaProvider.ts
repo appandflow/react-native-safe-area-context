@@ -12,6 +12,18 @@ export type Event = Readonly<{
     bottom: CodegenTypes.Double;
     left: CodegenTypes.Double;
   }>;
+  verticalCornerAdaptedInsets: Readonly<{
+    top: Double;
+    right: Double;
+    bottom: Double;
+    left: Double;
+  }>;
+  horizontalCornerAdaptedInsets: Readonly<{
+    top: Double;
+    right: Double;
+    bottom: Double;
+    left: Double;
+  }>;
   frame: Readonly<{
     x: CodegenTypes.Double;
     y: CodegenTypes.Double;
