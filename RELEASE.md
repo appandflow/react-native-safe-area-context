@@ -9,6 +9,9 @@ publishing with provenance. Stable releases use `latest`; prereleases use `next`
 ## Release
 
 1. Check npm's current versions and prepare the version bump in a separate PR.
+   In the same PR, run `bundle exec pod install` in `example/ios` so
+   `example/ios/Podfile.lock` records the new version. Commit only the
+   `react-native-safe-area-context` lines.
 2. Merge it after review and successful CI. Local npm publishing remains disabled
    in `release-it`.
 3. Tag the merged commit, using the actual version in place of `X.Y.Z`:
