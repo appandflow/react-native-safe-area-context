@@ -20,6 +20,11 @@ using namespace facebook::react;
 @implementation RNCSafeAreaViewComponentView {
   RNCSafeAreaViewShadowNode::ConcreteState::Shared _state;
   UIEdgeInsets _currentSafeAreaInsets;
+#if TARGET_OS_IPHONE
+  RNCSafeAreaCornerInputs _cornerInputs;
+  RNCSafeAreaCornerAdaptation _measuredCornerAdaptation;
+  UIEdgeInsets _cornerAdaptedInsets;
+#endif
   __weak UIView *_Nullable _providerView;
 }
 
@@ -75,7 +80,7 @@ using namespace facebook::react;
   UIView *previousProviderView = _providerView;
   _providerView = [self findNearestProvider];
 
-  [self updateStateIfNecessary];
+  [self updateStateIfNecessaryMeasuringCorners:YES];
 
   if (previousProviderView != _providerView) {
     [NSNotificationCenter.defaultCenter removeObserver:self name:RNCSafeAreaDidChange object:previousProviderView];
@@ -88,10 +93,29 @@ using namespace facebook::react;
 
 - (void)safeAreaProviderInsetsDidChange:(NSNotification *)notification
 {
-  [self updateStateIfNecessary];
+  [self updateStateIfNecessaryMeasuringCorners:YES];
 }
 
-- (void)updateStateIfNecessary
+#if TARGET_OS_IPHONE
+- (UIEdgeInsets)providerSafeAreaInsetsMeasuringCorners:(BOOL)measureCorners
+{
+  UIEdgeInsets safeAreaInsets = _providerView.safeAreaInsets;
+  RNCSafeAreaCornerAdaptation cornerAdaptation = [self cornerAdaptation];
+  if (cornerAdaptation == RNCSafeAreaCornerAdaptationNone) {
+    return safeAreaInsets;
+  }
+  RNCSafeAreaCornerInputs cornerInputs = RNCSafeAreaCornerInputsMake(_providerView, safeAreaInsets);
+  if (measureCorners || cornerAdaptation != _measuredCornerAdaptation ||
+      !RNCSafeAreaCornerInputsEqual(cornerInputs, _cornerInputs)) {
+    _cornerInputs = cornerInputs;
+    _measuredCornerAdaptation = cornerAdaptation;
+    _cornerAdaptedInsets = RNCSafeAreaInsetsWithCornerAdaptation(_providerView, cornerAdaptation);
+  }
+  return _cornerAdaptedInsets;
+}
+#endif
+
+- (void)updateStateIfNecessaryMeasuringCorners:(BOOL)measureCorners
 {
   // A view detached from the window (e.g. a screen covered by a react-native-screens
   // native stack) reports zero safeAreaInsets, which would commit a zero-inset layout
@@ -103,7 +127,7 @@ using namespace facebook::react;
     return;
   }
 #if TARGET_OS_IPHONE
-  UIEdgeInsets safeAreaInsets = _providerView.safeAreaInsets;
+  UIEdgeInsets safeAreaInsets = [self providerSafeAreaInsetsMeasuringCorners:measureCorners];
 
   if (UIEdgeInsetsEqualToEdgeInsetsWithThreshold(safeAreaInsets, _currentSafeAreaInsets, 1.0 / RCTScreenScale())) {
     return;
@@ -116,6 +140,19 @@ using namespace facebook::react;
 #endif
   _currentSafeAreaInsets = safeAreaInsets;
   [self updateState];
+}
+
+- (RNCSafeAreaCornerAdaptation)cornerAdaptation
+{
+  switch (std::static_pointer_cast<const RNCSafeAreaViewProps>(_props)->cornerAdaptation) {
+    case RNCSafeAreaViewCornerAdaptation::Vertical:
+      return RNCSafeAreaCornerAdaptationVertical;
+    case RNCSafeAreaViewCornerAdaptation::Horizontal:
+      return RNCSafeAreaCornerAdaptationHorizontal;
+    case RNCSafeAreaViewCornerAdaptation::None:
+      return RNCSafeAreaCornerAdaptationNone;
+  }
+  return RNCSafeAreaCornerAdaptationNone;
 }
 
 - (UIView *)findNearestProvider
@@ -160,7 +197,7 @@ using namespace facebook::react;
 - (void)finalizeUpdates:(RNComponentViewUpdateMask)updateMask
 {
   [super finalizeUpdates:updateMask];
-  [self updateStateIfNecessary];
+  [self updateStateIfNecessaryMeasuringCorners:NO];
 }
 
 - (void)prepareForRecycle
@@ -171,6 +208,9 @@ using namespace facebook::react;
   _state.reset();
   _providerView = nil;
   _currentSafeAreaInsets = UIEdgeInsetsZero;
+#if TARGET_OS_IPHONE
+  _measuredCornerAdaptation = RNCSafeAreaCornerAdaptationNone;
+#endif
 }
 
 @end

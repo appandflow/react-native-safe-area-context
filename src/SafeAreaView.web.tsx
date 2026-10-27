@@ -36,8 +36,8 @@ export const SafeAreaView: React.ForwardRefExoticComponent<
   React.PropsWithoutRef<NativeSafeAreaViewProps> &
     React.RefAttributes<NativeSafeAreaViewInstance>
 > = React.forwardRef<NativeSafeAreaViewInstance, NativeSafeAreaViewProps>(
-  ({ style = {}, mode, edges, ...rest }, ref) => {
-    const insets = useSafeAreaInsets();
+  ({ style = {}, mode, edges, cornerAdaptation, ...rest }, ref) => {
+    const insets = useSafeAreaInsets({ cornerAdaptation });
 
     const edgesRecord = React.useMemo(() => {
       if (edges == null) {

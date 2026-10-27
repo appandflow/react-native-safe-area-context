@@ -1,6 +1,11 @@
 name: iOS build
 
 on:
+  workflow_call:
+    inputs:
+      ref:
+        type: string
+        required: false
   push:
     branches:
       - main
@@ -17,6 +22,8 @@ on:
       - 'react-native.config.js'
       - 'src/specs/**'
       - 'yarn.lock'
+      - 'Package.swift'
+      - 'src/__tests__/swiftpm-test.ts'
   pull_request:
     paths:
       - '.github/workflows/ios.yml'
@@ -31,11 +38,15 @@ on:
       - 'react-native.config.js'
       - 'src/specs/**'
       - 'yarn.lock'
+      - 'Package.swift'
+      - 'src/__tests__/swiftpm-test.ts'
 jobs:
   ios-build:
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.ref || github.ref }}
       - name: Use Node.js 22.13.0
         uses: actions/setup-node@v4
         with:
@@ -46,9 +57,11 @@ jobs:
           working-directory: example
           bundler-cache: true
       - name: Install dependencies
-        run: yarn install
+        run: yarn install --frozen-lockfile
+      - name: Verify SwiftPM manifest
+        run: yarn jest src/__tests__/swiftpm-test.ts
       - name: Install example app dependencies
-        run: yarn install
+        run: yarn install --frozen-lockfile
         working-directory: example
       - name: Validate podspec
         run: bundle exec pod lib lint ../react-native-safe-area-context.podspec --quick --allow-warnings --no-ansi

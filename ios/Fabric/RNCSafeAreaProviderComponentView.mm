@@ -15,6 +15,13 @@ using namespace facebook::react;
 
 @implementation RNCSafeAreaProviderComponentView {
   UIEdgeInsets _currentSafeAreaInsets;
+  UIEdgeInsets _currentVerticalCornerAdaptedInsets;
+  UIEdgeInsets _currentHorizontalCornerAdaptedInsets;
+#if TARGET_OS_IPHONE
+  RNCSafeAreaCornerInputs _cornerInputs;
+  UIEdgeInsets _measuredVerticalCornerAdaptedInsets;
+  UIEdgeInsets _measuredHorizontalCornerAdaptedInsets;
+#endif
   CGRect _currentFrame;
   BOOL _initialInsetsSent;
   BOOL _registeredNotifications;
@@ -68,10 +75,15 @@ using namespace facebook::react;
 
 - (void)safeAreaInsetsDidChange
 {
-  [self invalidateSafeAreaInsets];
+  [self invalidateSafeAreaInsetsMeasuringCorners:YES];
 }
 
 - (void)invalidateSafeAreaInsets
+{
+  [self invalidateSafeAreaInsetsMeasuringCorners:NO];
+}
+
+- (void)invalidateSafeAreaInsetsMeasuringCorners:(BOOL)measureCorners
 {
   if (self.superview == nil) {
     return;
@@ -83,11 +95,30 @@ using namespace facebook::react;
   }
 
   UIEdgeInsets safeAreaInsets = self.safeAreaInsets;
+#if TARGET_OS_IPHONE
+  RNCSafeAreaCornerInputs cornerInputs = RNCSafeAreaCornerInputsMake(self, safeAreaInsets);
+  if (measureCorners || !RNCSafeAreaCornerInputsEqual(cornerInputs, _cornerInputs)) {
+    _cornerInputs = cornerInputs;
+    _measuredVerticalCornerAdaptedInsets =
+        RNCSafeAreaInsetsWithCornerAdaptation(self, RNCSafeAreaCornerAdaptationVertical);
+    _measuredHorizontalCornerAdaptedInsets =
+        RNCSafeAreaInsetsWithCornerAdaptation(self, RNCSafeAreaCornerAdaptationHorizontal);
+  }
+  UIEdgeInsets verticalCornerAdaptedInsets = _measuredVerticalCornerAdaptedInsets;
+  UIEdgeInsets horizontalCornerAdaptedInsets = _measuredHorizontalCornerAdaptedInsets;
+#elif TARGET_OS_OSX
+  UIEdgeInsets verticalCornerAdaptedInsets = safeAreaInsets;
+  UIEdgeInsets horizontalCornerAdaptedInsets = safeAreaInsets;
+#endif
   CGRect frame = [self convertRect:self.bounds toView:RNCParentViewController(self).view];
 
   if (_initialInsetsSent &&
 #if TARGET_OS_IPHONE
       UIEdgeInsetsEqualToEdgeInsetsWithThreshold(safeAreaInsets, _currentSafeAreaInsets, 1.0 / RCTScreenScale()) &&
+      UIEdgeInsetsEqualToEdgeInsetsWithThreshold(
+          verticalCornerAdaptedInsets, _currentVerticalCornerAdaptedInsets, 1.0 / RCTScreenScale()) &&
+      UIEdgeInsetsEqualToEdgeInsetsWithThreshold(
+          horizontalCornerAdaptedInsets, _currentHorizontalCornerAdaptedInsets, 1.0 / RCTScreenScale()) &&
 #elif TARGET_OS_OSX
       NSEdgeInsetsEqualToEdgeInsetsWithThreshold(safeAreaInsets, _currentSafeAreaInsets, 1.0 / RCTScreenScale()) &&
 #endif
@@ -97,6 +128,8 @@ using namespace facebook::react;
 
   _initialInsetsSent = YES;
   _currentSafeAreaInsets = safeAreaInsets;
+  _currentVerticalCornerAdaptedInsets = verticalCornerAdaptedInsets;
+  _currentHorizontalCornerAdaptedInsets = horizontalCornerAdaptedInsets;
   _currentFrame = frame;
 
   [NSNotificationCenter.defaultCenter postNotificationName:RNCSafeAreaDidChange object:self userInfo:nil];
@@ -109,6 +142,20 @@ using namespace facebook::react;
                 .left = safeAreaInsets.left,
                 .bottom = safeAreaInsets.bottom,
                 .right = safeAreaInsets.right,
+            },
+        .verticalCornerAdaptedInsets =
+            {
+                .top = verticalCornerAdaptedInsets.top,
+                .right = verticalCornerAdaptedInsets.right,
+                .bottom = verticalCornerAdaptedInsets.bottom,
+                .left = verticalCornerAdaptedInsets.left,
+            },
+        .horizontalCornerAdaptedInsets =
+            {
+                .top = horizontalCornerAdaptedInsets.top,
+                .right = horizontalCornerAdaptedInsets.right,
+                .bottom = horizontalCornerAdaptedInsets.bottom,
+                .left = horizontalCornerAdaptedInsets.left,
             },
         .frame =
             {
@@ -126,7 +173,9 @@ using namespace facebook::react;
 {
   [super layoutSubviews];
 
-  [self invalidateSafeAreaInsets];
+  // UIKit can update corner-adapted insets in a layout pass before anything they depend on changes, e.g. while
+  // the iPhone Duo switches displays, so layout passes always measure them again.
+  [self invalidateSafeAreaInsetsMeasuringCorners:YES];
 }
 
 #pragma mark - RCTComponentViewProtocol
@@ -140,6 +189,11 @@ using namespace facebook::react;
 {
   [super prepareForRecycle];
   _currentSafeAreaInsets = UIEdgeInsetsZero;
+  _currentVerticalCornerAdaptedInsets = UIEdgeInsetsZero;
+  _currentHorizontalCornerAdaptedInsets = UIEdgeInsetsZero;
+#if TARGET_OS_IPHONE
+  _cornerInputs = (RNCSafeAreaCornerInputs){};
+#endif
   _currentFrame = CGRectZero;
   _initialInsetsSent = NO;
   [NSNotificationCenter.defaultCenter removeObserver:self];

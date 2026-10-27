@@ -1,6 +1,6 @@
 {
   "name": "react-native-safe-area-context",
-  "version": "5.9.1",
+  "version": "5.10.1",
   "description": "A flexible way to handle safe area, also works on Android and web.",
   "main": "./lib/module/index.js",
   "types": "./lib/typescript/src/index.d.ts",
@@ -25,6 +25,7 @@
     "ios",
     "common",
     "*.podspec",
+    "Package.swift",
     "react-native.config.js",
     "!lib/commonjs",
     "!ios/build",
@@ -62,6 +63,7 @@
     "format:spotless:write": "cd android && ./gradlew spotlessApply",
     "format:check": "yarn format:oxfmt:check && yarn format:clang:check && yarn format:spotless:check",
     "format:write": "yarn format:oxfmt:write && yarn format:clang:write && yarn format:spotless:write",
+    "build": "bob build",
     "release": "release-it",
     "prepare": "bob build"
   },
@@ -113,7 +115,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/AppAndFlow/react-native-safe-area-context.git"
+    "url": "git+https://github.com/appandflow/react-native-safe-area-context.git"
   },
   "jest": {
     "preset": "@react-native/jest-preset",
@@ -162,6 +164,9 @@
         }
       ]
     ]
+  },
+  "swiftpmConfig": {
+    "name": "ReactNativeSafeAreaContext"
   },
   "codegenConfig": {
     "android": {

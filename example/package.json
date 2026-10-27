@@ -9,6 +9,7 @@
     "ios": "react-native run-ios --scheme ReactTestApp",
     "lint": "yarn --cwd .. validate:oxlint",
     "mkdist": "node -e \"require('node:fs').mkdirSync('dist', { recursive: true, mode: 0o755 })\"",
+    "postinstall": "patch-package",
     "start": "react-native start",
     "test": "jest",
     "typecheck": "tsc --noEmit"
@@ -37,6 +38,7 @@
     "@types/react": "~19.2.0",
     "babel-jest": "^29.6.3",
     "jest": "^29.2.1",
+    "patch-package": "8.0.0",
     "react-native-test-app": "^5.4.9",
     "typescript": "7.0.2"
   },
