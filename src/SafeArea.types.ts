@@ -1,6 +1,5 @@
 import type * as React from 'react';
 import type { NativeSyntheticEvent, View, ViewProps } from 'react-native';
-import NativeSafeAreaView from './specs/NativeSafeAreaView';
 
 export type Edge = 'top' | 'right' | 'bottom' | 'left';
 export type EdgeMode = 'off' | 'additive' | 'maximum';
@@ -49,7 +48,7 @@ export type InsetChangedEvent = NativeSyntheticEvent<Metrics>;
 export type InsetChangeNativeCallback = (event: InsetChangedEvent) => void;
 
 export interface NativeSafeAreaProviderProps extends ViewProps {
-  ref?: React.Ref<View>;
+  ref?: React.Ref<React.ComponentRef<typeof View>>;
   children?: React.ReactNode;
   onInsetsChange: InsetChangeNativeCallback;
 }
@@ -65,6 +64,4 @@ export interface NativeSafeAreaViewProps extends ViewProps {
   cornerAdaptation?: CornerAdaptation;
 }
 
-export type NativeSafeAreaViewInstance = InstanceType<
-  typeof NativeSafeAreaView
->;
+export type NativeSafeAreaViewInstance = React.ComponentRef<typeof View>;

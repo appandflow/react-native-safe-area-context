@@ -157,7 +157,7 @@ diff --git a/node_modules/react-native-screens/ios/RNSScreen.mm b/node_modules/r
 index 69d4d9a..7df8ffc 100644
 --- a/node_modules/react-native-screens/ios/RNSScreen.mm
 +++ b/node_modules/react-native-screens/ios/RNSScreen.mm
-@@ -1290,6 +1290,14 @@ - (void)updateProps:(react::Props::Shared const &)props oldProps:(react::Props::
+@@ -1254,6 +1254,14 @@ - (void)updateProps:(react::Props::Shared const &)props oldProps:(react::Props::
        setGestureResponseDistance:[RNSConvert
                                       gestureResponseDistanceDictFromCppStruct:newScreenProps.gestureResponseDistance]];
  
@@ -291,3 +291,19 @@ index 76a83f3..a25734f 100644
    /**
     * Boolean indicating that the screen should be frozen with `react-freeze`.
     */
+diff --git a/node_modules/react-native-screens/lib/typescript/types.d.ts b/node_modules/react-native-screens/lib/typescript/types.d.ts
+--- a/node_modules/react-native-screens/lib/typescript/types.d.ts
++++ b/node_modules/react-native-screens/lib/typescript/types.d.ts
+@@ -75,6 +75,12 @@
+     backgroundColor?: ColorValue | undefined;
+ };
+ export interface ScreenProps extends ViewProps {
++    additionalSafeAreaInsets?: {
++        top?: number;
++        right?: number;
++        bottom?: number;
++        left?: number;
++    } | undefined;
+     active?: 0 | 1 | Animated.AnimatedInterpolation<number> | undefined;
+     activityState?: 0 | 1 | 2 | Animated.AnimatedInterpolation<number> | undefined;
+     /**

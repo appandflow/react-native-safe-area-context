@@ -18,7 +18,7 @@ function SimpleExampleScreen() {
 
   return (
     <>
-      <StatusBar barStyle="dark-content" backgroundColor="transparent" />
+      <StatusBar barStyle="dark-content" />
       <View
         style={{
           width: frame.width,

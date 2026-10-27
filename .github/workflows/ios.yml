@@ -11,47 +11,37 @@ on:
       - main
     paths:
       - '.github/workflows/ios.yml'
-      - 'ios/**'
       - 'common/**'
       - 'example/ios/**'
+      - 'example/package.json'
+      - 'example/react-native.config.js'
+      - 'example/yarn.lock'
+      - 'ios/**'
+      - 'package.json'
+      - 'react-native-safe-area-context.podspec'
+      - 'react-native.config.js'
+      - 'src/specs/**'
+      - 'yarn.lock'
       - 'Package.swift'
       - 'src/__tests__/swiftpm-test.ts'
   pull_request:
     paths:
       - '.github/workflows/ios.yml'
-      - 'ios/**'
       - 'common/**'
       - 'example/ios/**'
+      - 'example/package.json'
+      - 'example/react-native.config.js'
+      - 'example/yarn.lock'
+      - 'ios/**'
+      - 'package.json'
+      - 'react-native-safe-area-context.podspec'
+      - 'react-native.config.js'
+      - 'src/specs/**'
+      - 'yarn.lock'
       - 'Package.swift'
       - 'src/__tests__/swiftpm-test.ts'
 jobs:
   ios-build:
-    runs-on: macos-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: ${{ inputs.ref || github.ref }}
-      - name: Use Node.js 22.13.0
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22.13.0
-      - uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: 3.2
-          working-directory: example
-          bundler-cache: true
-      - name: Install dependencies
-        run: yarn install --frozen-lockfile
-      - name: Install example app dependencies
-        run: yarn install --frozen-lockfile
-        working-directory: example
-      - name: Install pods
-        run: RCT_NEW_ARCH_ENABLED=0 npx pod-install
-        working-directory: example/ios
-      - name: Build ios example app
-        run: xcodebuild -scheme ReactTestApp -workspace RNSACExample.xcworkspace ONLY_ACTIVE_ARCH=NO -sdk iphonesimulator -configuration Debug
-        working-directory: example/ios
-  ios-build-fabric:
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
@@ -73,7 +63,7 @@ jobs:
       - name: Install example app dependencies
         run: yarn install --frozen-lockfile
         working-directory: example
-      - name: Install pods for new arch
+      - name: Install pods
         run: RCT_NEW_ARCH_ENABLED=1 npx pod-install
         working-directory: example/ios
       - name: Build ios example app

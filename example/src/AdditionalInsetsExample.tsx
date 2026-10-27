@@ -88,7 +88,7 @@ function Content() {
   const [enabled, setEnabled] = React.useState(true);
   return (
     <View style={{ flex: 1, backgroundColor: '#eee' }}>
-      <StatusBar barStyle="dark-content" backgroundColor="transparent" />
+      <StatusBar barStyle="dark-content" />
       <View
         style={{
           paddingTop: insets.top + 8,

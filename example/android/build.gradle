@@ -42,5 +42,5 @@ allprojects {
     }
 }
 
-rootProject.ext.set("react.compileSdkVersion", 36)
+rootProject.ext.set("react.compileSdkVersion", 37)
 rootProject.ext.set("react.targetSdkVersion", 36)

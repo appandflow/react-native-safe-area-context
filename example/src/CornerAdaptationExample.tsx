@@ -34,7 +34,7 @@ function CornerAdaptationScreen() {
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="transparent" />
+      <StatusBar barStyle="light-content" />
       <SafeAreaView
         edges={['top', 'left', 'right']}
         cornerAdaptation={cornerAdaptation}
