@@ -1,7 +1,9 @@
-<img width="3315" height="951" alt="safe" src="https://github.com/user-attachments/assets/24613a26-95da-4777-870e-f5c53c82da2a" />
+<img width="100%" alt="Simplifying layout management with React — maintained by App&Flow" src="./docs/static/img/github-banner.png" />
 
 ### About
 App & Flow is a Montreal-based React Native engineering and consulting studio. We partner with the world’s top companies and are recommended by [Expo](https://expo.dev/consultants). Need a hand? Let’s build together. team@appandflow.com
+
+Visit the React Native Safe Area Context website: [rnsac.appandflow.com](https://rnsac.appandflow.com).
 
 # react-native-safe-area-context
 
@@ -13,7 +15,7 @@ A flexible way to handle safe area, also works on Android and Web!
 
 ## Documentation
 
-Check out our [documentation site](https://appandflow.github.io/react-native-safe-area-context/).
+Check out our [documentation site](https://rnsac.appandflow.com/).
 
 ## Contributing
 
