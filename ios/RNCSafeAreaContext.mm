@@ -7,6 +7,7 @@
 #import <AppKit/AppKit.h>
 #endif
 #import <safeareacontext/safeareacontext.h>
+#import "RNCSafeAreaUtils.h"
 
 using namespace facebook::react;
 
@@ -44,8 +45,14 @@ RCT_EXPORT_MODULE()
 
 #if TARGET_OS_IPHONE
     UIEdgeInsets safeAreaInsets = window.safeAreaInsets;
+    UIEdgeInsets verticalCornerAdaptedInsets =
+        RNCSafeAreaInsetsWithCornerAdaptation(window, RNCSafeAreaCornerAdaptationVertical);
+    UIEdgeInsets horizontalCornerAdaptedInsets =
+        RNCSafeAreaInsetsWithCornerAdaptation(window, RNCSafeAreaCornerAdaptationHorizontal);
 #elif TARGET_OS_OSX
     NSEdgeInsets safeAreaInsets = NSEdgeInsetsZero;
+    NSEdgeInsets verticalCornerAdaptedInsets = NSEdgeInsetsZero;
+    NSEdgeInsets horizontalCornerAdaptedInsets = NSEdgeInsetsZero;
 #endif
 
     constants = @{
@@ -55,6 +62,18 @@ RCT_EXPORT_MODULE()
           @"right" : @(safeAreaInsets.right),
           @"bottom" : @(safeAreaInsets.bottom),
           @"left" : @(safeAreaInsets.left),
+        },
+        @"verticalCornerAdaptedInsets" : @{
+          @"top" : @(verticalCornerAdaptedInsets.top),
+          @"right" : @(verticalCornerAdaptedInsets.right),
+          @"bottom" : @(verticalCornerAdaptedInsets.bottom),
+          @"left" : @(verticalCornerAdaptedInsets.left),
+        },
+        @"horizontalCornerAdaptedInsets" : @{
+          @"top" : @(horizontalCornerAdaptedInsets.top),
+          @"right" : @(horizontalCornerAdaptedInsets.right),
+          @"bottom" : @(horizontalCornerAdaptedInsets.bottom),
+          @"left" : @(horizontalCornerAdaptedInsets.left),
         },
         @"frame" : @{
           @"x" : @(window.frame.origin.x),

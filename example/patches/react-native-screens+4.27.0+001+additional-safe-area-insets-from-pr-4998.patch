@@ -1,0 +1,309 @@
+diff --git a/node_modules/react-native-screens/android/src/main/java/com/swmansion/rnscreens/Screen.kt b/node_modules/react-native-screens/android/src/main/java/com/swmansion/rnscreens/Screen.kt
+index 04c5316..4e9333e 100644
+--- a/node_modules/react-native-screens/android/src/main/java/com/swmansion/rnscreens/Screen.kt
++++ b/node_modules/react-native-screens/android/src/main/java/com/swmansion/rnscreens/Screen.kt
+@@ -9,11 +9,15 @@ import android.util.SparseArray
+ import android.view.MotionEvent
+ import android.view.View
+ import android.view.ViewGroup
++import android.view.WindowInsets
+ import android.view.WindowManager
+ import android.webkit.WebView
+ import android.widget.ImageView
+ import androidx.annotation.RequiresApi
+ import androidx.coordinatorlayout.widget.CoordinatorLayout
++import androidx.core.graphics.Insets
++import androidx.core.view.ViewCompat
++import androidx.core.view.WindowInsetsCompat
+ import androidx.core.view.children
+ import androidx.fragment.app.Fragment
+ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+@@ -102,6 +106,14 @@ class Screen(
+      */
+     var shouldTriggerPostponedTransitionAfterLayout = false
+ 
++    var additionalSafeAreaInsets: Insets = Insets.NONE
++        set(value) {
++            if (field != value) {
++                field = value
++                ViewCompat.requestApplyInsets(this)
++            }
++        }
++
+     var footer: ScreenFooter? = null
+         set(value) {
+             if (value == null && field != null) {
+@@ -546,6 +558,48 @@ class Screen(
+         updateShadowNodeScreenSize(width, height, top + translationY.toInt())
+     }
+ 
++    override fun dispatchApplyWindowInsets(insets: WindowInsets): WindowInsets {
++        if (additionalSafeAreaInsets == Insets.NONE) {
++            return super.dispatchApplyWindowInsets(insets)
++        }
++
++        val result = super.dispatchApplyWindowInsets(insetsWithAdditionalSafeArea(insets))
++        // Before API 30, a parent passes the insets returned by one child on to the next one,
++        // so the extra insets must not leak to the screen's siblings.
++        return if (result.isConsumed) result else insets
++    }
++
++    private fun insetsWithAdditionalSafeArea(insets: WindowInsets): WindowInsets {
++        val insetsCompat = WindowInsetsCompat.toWindowInsetsCompat(insets, this)
++        val extra = additionalSafeAreaInsets
++        val safeArea =
++            insetsCompat.getInsets(WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.displayCutout())
++        val statusBars = insetsCompat.getInsets(WindowInsetsCompat.Type.statusBars())
++        val navigationBars = insetsCompat.getInsets(WindowInsetsCompat.Type.navigationBars())
++
++        fun grow(
++            current: Int,
++            safe: Int,
++            extra: Int,
++        ) = if (extra == 0) current else safe + extra
++
++        return WindowInsetsCompat
++            .Builder(insetsCompat)
++            .setInsets(
++                WindowInsetsCompat.Type.statusBars(),
++                Insets.of(statusBars.left, grow(statusBars.top, safeArea.top, extra.top), statusBars.right, statusBars.bottom),
++            ).setInsets(
++                WindowInsetsCompat.Type.navigationBars(),
++                Insets.of(
++                    grow(navigationBars.left, safeArea.left, extra.left),
++                    navigationBars.top,
++                    grow(navigationBars.right, safeArea.right, extra.right),
++                    grow(navigationBars.bottom, safeArea.bottom, extra.bottom),
++                ),
++            ).build()
++            .toWindowInsets() ?: insets
++    }
++
+     override fun onAttachedToWindow() {
+         super.onAttachedToWindow()
+ 
+diff --git a/node_modules/react-native-screens/android/src/main/java/com/swmansion/rnscreens/ScreenViewManager.kt b/node_modules/react-native-screens/android/src/main/java/com/swmansion/rnscreens/ScreenViewManager.kt
+index 2987072..f781172 100644
+--- a/node_modules/react-native-screens/android/src/main/java/com/swmansion/rnscreens/ScreenViewManager.kt
++++ b/node_modules/react-native-screens/android/src/main/java/com/swmansion/rnscreens/ScreenViewManager.kt
+@@ -1,10 +1,12 @@
+ package com.swmansion.rnscreens
+ 
+ import android.view.View
++import androidx.core.graphics.Insets
+ import com.facebook.react.bridge.JSApplicationIllegalArgumentException
+ import com.facebook.react.bridge.ReadableArray
+ import com.facebook.react.bridge.ReadableMap
+ import com.facebook.react.module.annotations.ReactModule
++import com.facebook.react.uimanager.PixelUtil
+ import com.facebook.react.uimanager.ReactStylesDiffMap
+ import com.facebook.react.uimanager.StateWrapper
+ import com.facebook.react.uimanager.ThemedReactContext
+@@ -283,6 +285,19 @@ open class ScreenViewManager :
+         value: ReadableMap?,
+     ) = Unit
+ 
++    override fun setAdditionalSafeAreaInsets(
++        view: Screen?,
++        value: ReadableMap?,
++    ) {
++        view?.additionalSafeAreaInsets =
++            Insets.of(
++                PixelUtil.toPixelFromDIP(value?.getDouble("left") ?: 0.0).toInt(),
++                PixelUtil.toPixelFromDIP(value?.getDouble("top") ?: 0.0).toInt(),
++                PixelUtil.toPixelFromDIP(value?.getDouble("right") ?: 0.0).toInt(),
++                PixelUtil.toPixelFromDIP(value?.getDouble("bottom") ?: 0.0).toInt(),
++            )
++    }
++
+     override fun setHomeIndicatorHidden(
+         view: Screen?,
+         value: Boolean,
+diff --git a/node_modules/react-native-screens/ios/RNSConvert.h b/node_modules/react-native-screens/ios/RNSConvert.h
+index 47018db..9b263c8 100644
+--- a/node_modules/react-native-screens/ios/RNSConvert.h
++++ b/node_modules/react-native-screens/ios/RNSConvert.h
+@@ -41,6 +41,9 @@ namespace react = facebook::react;
+ + (NSDictionary *)gestureResponseDistanceDictFromCppStruct:
+     (const react::RNSScreenGestureResponseDistanceStruct &)gestureResponseDistance;
+ 
+++ (UIEdgeInsets)UIEdgeInsetsFromAdditionalSafeAreaInsetsCppStruct:
++    (const react::RNSScreenAdditionalSafeAreaInsetsStruct &)additionalSafeAreaInsets;
++
+ #if !TARGET_OS_VISION
+ + (UITextAutocapitalizationType)UITextAutocapitalizationTypeFromCppEquivalent:
+     (react::RNSSearchBarAutoCapitalize)autoCapitalize;
+diff --git a/node_modules/react-native-screens/ios/RNSConvert.mm b/node_modules/react-native-screens/ios/RNSConvert.mm
+index 7260a78..c20ddf9 100644
+--- a/node_modules/react-native-screens/ios/RNSConvert.mm
++++ b/node_modules/react-native-screens/ios/RNSConvert.mm
+@@ -203,6 +203,15 @@ + (NSDictionary *)gestureResponseDistanceDictFromCppStruct:
+   };
+ }
+ 
+++ (UIEdgeInsets)UIEdgeInsetsFromAdditionalSafeAreaInsetsCppStruct:
++    (const react::RNSScreenAdditionalSafeAreaInsetsStruct &)additionalSafeAreaInsets
++{
++  return UIEdgeInsetsMake(additionalSafeAreaInsets.top,
++                          additionalSafeAreaInsets.left,
++                          additionalSafeAreaInsets.bottom,
++                          additionalSafeAreaInsets.right);
++}
++
+ #if !TARGET_OS_VISION
+ + (UITextAutocapitalizationType)UITextAutocapitalizationTypeFromCppEquivalent:
+     (react::RNSSearchBarAutoCapitalize)autoCapitalize
+diff --git a/node_modules/react-native-screens/ios/RNSScreen.mm b/node_modules/react-native-screens/ios/RNSScreen.mm
+index 69d4d9a..7df8ffc 100644
+--- a/node_modules/react-native-screens/ios/RNSScreen.mm
++++ b/node_modules/react-native-screens/ios/RNSScreen.mm
+@@ -1254,6 +1254,14 @@ - (void)updateProps:(react::Props::Shared const &)props oldProps:(react::Props::
+       setGestureResponseDistance:[RNSConvert
+                                      gestureResponseDistanceDictFromCppStruct:newScreenProps.gestureResponseDistance]];
+ 
++  UIEdgeInsets newAdditionalSafeAreaInsets =
++      [RNSConvert UIEdgeInsetsFromAdditionalSafeAreaInsetsCppStruct:newScreenProps.additionalSafeAreaInsets];
++  if (!UIEdgeInsetsEqualToEdgeInsets(
++          newAdditionalSafeAreaInsets,
++          [RNSConvert UIEdgeInsetsFromAdditionalSafeAreaInsetsCppStruct:oldScreenProps.additionalSafeAreaInsets])) {
++    _controller.additionalSafeAreaInsets = newAdditionalSafeAreaInsets;
++  }
++
+   [self setPreventNativeDismiss:newScreenProps.preventNativeDismiss];
+ 
+   [self setActivityStateOrNil:[NSNumber numberWithFloat:newScreenProps.activityState]];
+diff --git a/node_modules/react-native-screens/src/components/Screen.tsx b/node_modules/react-native-screens/src/components/Screen.tsx
+index 8304d21..17bb16e 100644
+--- a/node_modules/react-native-screens/src/components/Screen.tsx
++++ b/node_modules/react-native-screens/src/components/Screen.tsx
+@@ -151,6 +151,7 @@ export const InnerScreen = React.forwardRef<View, ScreenProps>(
+         isNativeStack,
+         fullScreenSwipeEnabled,
+         gestureResponseDistance,
++        additionalSafeAreaInsets,
+         scrollEdgeEffects,
+         onGestureCancel,
+         style,
+@@ -256,6 +257,12 @@ export const InnerScreen = React.forwardRef<View, ScreenProps>(
+               top: gestureResponseDistance?.top ?? -1,
+               bottom: gestureResponseDistance?.bottom ?? -1,
+             }}
++            additionalSafeAreaInsets={{
++              top: additionalSafeAreaInsets?.top ?? 0,
++              right: additionalSafeAreaInsets?.right ?? 0,
++              bottom: additionalSafeAreaInsets?.bottom ?? 0,
++              left: additionalSafeAreaInsets?.left ?? 0,
++            }}
+             // This prevents showing blank screen when navigating between multiple screens with freezing
+             // https://github.com/software-mansion/react-native-screens/pull/1208
+             ref={handleRef}
+diff --git a/node_modules/react-native-screens/src/fabric/ModalScreenNativeComponent.ts b/node_modules/react-native-screens/src/fabric/ModalScreenNativeComponent.ts
+index 3721cbe..a3e4ef7 100644
+--- a/node_modules/react-native-screens/src/fabric/ModalScreenNativeComponent.ts
++++ b/node_modules/react-native-screens/src/fabric/ModalScreenNativeComponent.ts
+@@ -32,6 +32,13 @@ type GestureResponseDistanceType = Readonly<{
+   bottom: CT.Float;
+ }>;
+ 
++type AdditionalSafeAreaInsetsType = Readonly<{
++  top: CT.Float;
++  right: CT.Float;
++  bottom: CT.Float;
++  left: CT.Float;
++}>;
++
+ type StackPresentation =
+   | 'push'
+   | 'modal'
+@@ -106,6 +113,7 @@ export interface NativeProps extends ViewProps {
+   statusBarStyle?: string | undefined;
+   statusBarTranslucent?: boolean | undefined;
+   gestureResponseDistance?: GestureResponseDistanceType | undefined;
++  additionalSafeAreaInsets?: AdditionalSafeAreaInsetsType | undefined;
+   stackPresentation?: CT.WithDefault<StackPresentation, 'push'>;
+   stackAnimation?: CT.WithDefault<StackAnimation, 'default'>;
+   transitionDuration?: CT.WithDefault<CT.Int32, 500>;
+diff --git a/node_modules/react-native-screens/src/fabric/ScreenNativeComponent.ts b/node_modules/react-native-screens/src/fabric/ScreenNativeComponent.ts
+index fa037c9..c7f3ed9 100644
+--- a/node_modules/react-native-screens/src/fabric/ScreenNativeComponent.ts
++++ b/node_modules/react-native-screens/src/fabric/ScreenNativeComponent.ts
+@@ -32,6 +32,13 @@ type GestureResponseDistanceType = Readonly<{
+   bottom: CT.Float;
+ }>;
+ 
++type AdditionalSafeAreaInsetsType = Readonly<{
++  top: CT.Float;
++  right: CT.Float;
++  bottom: CT.Float;
++  left: CT.Float;
++}>;
++
+ type StackPresentation =
+   | 'push'
+   | 'modal'
+@@ -106,6 +113,7 @@ export interface NativeProps extends ViewProps {
+   statusBarStyle?: string | undefined;
+   statusBarTranslucent?: boolean | undefined;
+   gestureResponseDistance?: GestureResponseDistanceType | undefined;
++  additionalSafeAreaInsets?: AdditionalSafeAreaInsetsType | undefined;
+   stackPresentation?: CT.WithDefault<StackPresentation, 'push'>;
+   stackAnimation?: CT.WithDefault<StackAnimation, 'default'>;
+   transitionDuration?: CT.WithDefault<CT.Int32, 500>;
+diff --git a/node_modules/react-native-screens/src/types.tsx b/node_modules/react-native-screens/src/types.tsx
+index 76a83f3..a25734f 100644
+--- a/node_modules/react-native-screens/src/types.tsx
++++ b/node_modules/react-native-screens/src/types.tsx
+@@ -83,6 +83,13 @@ export type GestureResponseDistanceType = {
+   bottom?: number | undefined;
+ };
+ 
++export type AdditionalSafeAreaInsetsType = {
++  top?: number | undefined;
++  right?: number | undefined;
++  bottom?: number | undefined;
++  left?: number | undefined;
++};
++
+ export type SearchBarPlacement =
+   | 'automatic'
+   | 'inline' // deprecated starting from iOS 26
+@@ -144,6 +151,23 @@ export interface ScreenProps extends ViewProps {
+     | 2
+     | Animated.AnimatedInterpolation<number>
+     | undefined;
++  /**
++   * Insets, in points, added to the safe area of the screen's view controller,
++   * on top of the insets coming from the system and its containers.
++   * Edges that are not set default to `0`.
++   *
++   * Use it to keep content clear of UI drawn over the screen, e.g. a custom tab bar
++   * floating over its bottom edge. Scroll views with `contentInsetAdjustmentBehavior="automatic"`,
++   * `SafeAreaView` and other safe-area-aware views inside the screen take these insets into account,
++   * the same way they do for a native `UITabBar` on iOS.
++   *
++   * On iOS, maps to `UIViewController.additionalSafeAreaInsets`.
++   * On Android, the screen adds these insets to the window insets it dispatches to its children,
++   * which the library's `SafeAreaView` reads.
++   *
++   * @see {@link https://developer.apple.com/documentation/uikit/uiviewcontroller/additionalsafeareainsets|additionalSafeAreaInsets}
++   */
++  additionalSafeAreaInsets?: AdditionalSafeAreaInsetsType | undefined;
+   /**
+    * Boolean indicating that the screen should be frozen with `react-freeze`.
+    */
+diff --git a/node_modules/react-native-screens/lib/typescript/types.d.ts b/node_modules/react-native-screens/lib/typescript/types.d.ts
+--- a/node_modules/react-native-screens/lib/typescript/types.d.ts
++++ b/node_modules/react-native-screens/lib/typescript/types.d.ts
+@@ -75,6 +75,12 @@
+     backgroundColor?: ColorValue | undefined;
+ };
+ export interface ScreenProps extends ViewProps {
++    additionalSafeAreaInsets?: {
++        top?: number;
++        right?: number;
++        bottom?: number;
++        left?: number;
++    } | undefined;
+     active?: 0 | 1 | Animated.AnimatedInterpolation<number> | undefined;
+     activityState?: 0 | 1 | 2 | Animated.AnimatedInterpolation<number> | undefined;
+     /**

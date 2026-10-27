@@ -8,6 +8,8 @@ internal class InsetsChangeEvent(
     surfaceId: Int,
     viewTag: Int,
     private val mInsets: EdgeInsets,
+    private val mVerticalCornerAdaptedInsets: EdgeInsets,
+    private val mHorizontalCornerAdaptedInsets: EdgeInsets,
     private val mFrame: Rect,
 ) : Event<InsetsChangeEvent>(surfaceId, viewTag) {
   override fun getEventName() = EVENT_NAME
@@ -15,6 +17,11 @@ internal class InsetsChangeEvent(
   override fun getEventData(): WritableMap? {
     val event = Arguments.createMap()
     event.putMap("insets", edgeInsetsToJsMap(mInsets))
+    event.putMap("verticalCornerAdaptedInsets", edgeInsetsToJsMap(mVerticalCornerAdaptedInsets))
+    event.putMap(
+        "horizontalCornerAdaptedInsets",
+        edgeInsetsToJsMap(mHorizontalCornerAdaptedInsets),
+    )
     event.putMap("frame", rectToJsMap(mFrame))
     return event
   }
