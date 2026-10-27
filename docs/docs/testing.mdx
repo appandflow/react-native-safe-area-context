@@ -51,25 +51,20 @@ export function TestSafeAreaProvider({ children }) {
 }
 ```
 
-### Enabling Babel Parsing for Modules
+### Transforming the package with Jest
 
-While trying to use this mock, a frequently encountered error is:
+Starting with version 6, this library is published as ESM only. By default, [Jest does not transform files inside `node_modules`](https://jestjs.io/docs/configuration#transformignorepatterns-arraystring), so loading the package or its mock fails with:
 
-```tsx
-SyntaxError: Cannot use import statement outside a module.
+```
+SyntaxError: Cannot use import statement outside a module
 ```
 
-This issue arises due to the use of the import statement. To resolve it, you need to permit Babel to parse the file.
+If you use the React Native Jest preset (`react-native` or `@react-native/jest-preset`), add `react-native-safe-area-context` to `transformIgnorePatterns` in your Jest config:
 
-By default, [Jest does not parse files located within the node_modules folder](https://jestjs.io/configuration#transformignorepatterns-arraystring).
-
-However, you can modify this behavior as outlined in the Jest documentation on [`transformIgnorePatterns` customization](https://jestjs.io/tutorial-react-native#transformignorepatterns-customization).
-If you're using a preset, like the one from [react-native](https://github.com/facebook/react-native/blob/main/packages/react-native/jest-preset.js), you should update your Jest configuration to include `react-native-safe-area-context` as shown below:
-
-```tsx
+```js
 transformIgnorePatterns: [
   'node_modules/(?!((jest-)?react-native|@react-native(-community)?|react-native-safe-area-context)/)',
-];
+],
 ```
 
-This adjustment ensures Babel correctly parses modules, avoiding the aforementioned syntax error.
+If you already customize `transformIgnorePatterns`, add `react-native-safe-area-context` to your existing pattern instead. The `jest-expo` preset already transforms this package, so Expo projects don't need any change.

@@ -1,3 +1,3 @@
-import NativeSafeAreaProvider from './specs/NativeSafeAreaProvider';
+import NativeSafeAreaProvider from './specs/SafeAreaProviderNativeComponent';
 
 export { NativeSafeAreaProvider };

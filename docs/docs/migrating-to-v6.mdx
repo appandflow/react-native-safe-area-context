@@ -1,0 +1,19 @@
+---
+sidebar_position: 6
+title: Migrating to 6.x
+sidebar_label: Migrating to 6.x
+---
+
+Version 6 contains the following breaking changes.
+
+### New Architecture only
+
+Support for the old architecture (Paper) has been removed. Your app must use the New Architecture and React Native 0.82 or newer. If you still need the old architecture, stay on 5.x.
+
+### ESM only package
+
+The package is now published as ESM only, with an `exports` map.
+
+- Only the documented entry points (`react-native-safe-area-context` and `react-native-safe-area-context/jest/mock`) can be imported. Deep imports into `lib/` or `src/` no longer work.
+- Jest doesn't transform `node_modules` by default. Projects using the React Native Jest preset need to add this package to `transformIgnorePatterns`. See [Testing](./testing.mdx#transforming-the-package-with-jest). The `jest-expo` preset already handles this.
+- Loading the package with `require()` in Node.js needs Node 20.19+ or 22.12+.
