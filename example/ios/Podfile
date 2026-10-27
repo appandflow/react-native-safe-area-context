@@ -7,9 +7,7 @@ require "#{ws_dir}/node_modules/react-native-test-app/test_app.rb"
 workspace 'RNSACExample.xcworkspace'
 
 options = {
-# RCT_NEW_ARCH_ENABLED env variable (used in CI) takes precedence over the following
  :bridgeless_enabled => true,
- :fabric_enabled => true,
  :hermes_enabled => true,
 }
 

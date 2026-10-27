@@ -1,5 +1,3 @@
 
-<manifest
-	xmlns:android="http://schemas.android.com/apk/res/android"
-  package="com.th3rdwave.safeareacontext">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
 </manifest>

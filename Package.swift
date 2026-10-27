@@ -25,7 +25,6 @@ let package = Package(
                 .product(name: "ReactAppHeaders", package: "React-GeneratedCode"),
             ],
             path: ".",
-            exclude: ["ios/RNSafeAreaContext.xcodeproj"],
             sources: ["ios", "common/cpp"],
             publicHeadersPath: "ios",
             cSettings: [

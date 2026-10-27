@@ -1,9 +1,5 @@
-import codegenNativeComponent from 'react-native/Libraries/Utilities/codegenNativeComponent';
-import {
-  type CodegenTypes,
-  type HostComponent,
-  type ViewProps,
-} from 'react-native';
+import { codegenNativeComponent } from 'react-native';
+import type { CodegenTypes, HostComponent, ViewProps } from 'react-native';
 
 export type Event = Readonly<{
   insets: Readonly<{
