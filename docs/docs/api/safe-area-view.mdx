@@ -8,6 +8,8 @@ sidebar_label: SafeAreaView
 
 Padding or margin styles are added to the insets, for example `style={{paddingTop: 10}}` on a `SafeAreaView` that has insets of 20 will result in a top padding of 30.
 
+On web, a percentage is combined with the inset through CSS `calc()` or `max()`. With `mode="margin"`, an `auto` margin stays `auto` and replaces the inset on that edge.
+
 ### Example
 
 ```tsx
