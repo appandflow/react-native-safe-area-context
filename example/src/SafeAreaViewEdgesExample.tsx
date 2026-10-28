@@ -81,7 +81,7 @@ export default function ReactNativeSafeAreaViewEdges() {
               <Switch
                 value={top}
                 onValueChange={setTop}
-                style={{ position: 'absolute', top: 5 }}
+                style={{ position: 'absolute', top: 5, alignSelf: 'center' }}
                 {...edgeSwitchBaseProps}
               />
               <Switch
@@ -93,7 +93,7 @@ export default function ReactNativeSafeAreaViewEdges() {
               <Switch
                 value={bottom}
                 onValueChange={setBottom}
-                style={{ position: 'absolute', bottom: 5 }}
+                style={{ position: 'absolute', bottom: 5, alignSelf: 'center' }}
                 {...edgeSwitchBaseProps}
               />
               <Switch
