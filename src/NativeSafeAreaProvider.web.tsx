@@ -17,6 +17,7 @@ export function NativeSafeAreaProvider({
   style,
   onInsetsChange,
   ref,
+  unstable_disableViewOnWeb,
 }: NativeSafeAreaProviderProps) {
   const viewRef = React.useRef<View>(null);
 
@@ -123,6 +124,10 @@ export function NativeSafeAreaProvider({
       element.remove();
     };
   }, [onInsetsChange]);
+
+  if (unstable_disableViewOnWeb) {
+    return <>{children}</>;
+  }
 
   return (
     <View ref={setRef} style={style}>
