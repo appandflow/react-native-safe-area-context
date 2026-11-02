@@ -91,6 +91,16 @@ using namespace facebook::react;
   }
 }
 
+- (void)safeAreaInsetsDidChange
+{
+  [super safeAreaInsetsDidChange];
+  // Without a provider above it (e.g. in a native sheet), the view is its own provider and no
+  // provider notification reaches it, so follow its own insets here.
+  if (_providerView == self) {
+    [self updateStateIfNecessaryMeasuringCorners:YES];
+  }
+}
+
 - (void)safeAreaProviderInsetsDidChange:(NSNotification *)notification
 {
   [self updateStateIfNecessaryMeasuringCorners:YES];
@@ -179,7 +189,11 @@ using namespace facebook::react;
         auto newData = oldData;
         newData.insets = RCTEdgeInsetsFromUIEdgeInsets(_currentSafeAreaInsets);
         return std::make_shared<RNCSafeAreaViewShadowNode::ConcreteState::Data const>(newData);
-      });
+      },
+      // Commit the new insets with the layout pass that changed them (e.g. a rotation), instead of
+      // waiting for the next event beat, which leaves stale insets on screen for some frames in a
+      // busy app.
+      facebook::react::EventQueue::UpdateMode::unstable_Immediate);
 }
 
 #pragma mark - RCTComponentViewProtocol
