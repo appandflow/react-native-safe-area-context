@@ -3,6 +3,7 @@ import { DevSettings, View, Text, StatusBar } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import AdditionalInsetsExample from './AdditionalInsetsExample';
 import CornerAdaptationExample from './CornerAdaptationExample';
+import FormSheetExample from './FormSheetExample';
 import HooksExample from './HooksExample';
 import ListenerExample from './ListenerExample';
 import SafeAreaViewExample from './SafeAreaViewExample';
@@ -20,6 +21,7 @@ type Example =
   | 'corner-adaptation'
   | 'react-navigation'
   | 'native-stack'
+  | 'form-sheet'
   | 'additional-insets';
 
 export default function App() {
@@ -70,6 +72,9 @@ export default function App() {
     DevSettings.addMenuItem('Show Native Stack Example', () => {
       setCurrentExample('native-stack');
     });
+    DevSettings.addMenuItem('Show Form Sheet Example', () => {
+      setCurrentExample('form-sheet');
+    });
     DevSettings.addMenuItem('Show Additional Insets Example', () => {
       setCurrentExample('additional-insets');
     });
@@ -97,6 +102,9 @@ export default function App() {
     //   break;
     case 'native-stack':
       content = <ReactNavigationNativeStackExample />;
+      break;
+    case 'form-sheet':
+      content = <FormSheetExample />;
       break;
     case 'additional-insets':
       content = <AdditionalInsetsExample />;
