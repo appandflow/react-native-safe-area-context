@@ -12,7 +12,37 @@
 #import "RNCSafeAreaProviderComponentView.h"
 #import "RNCSafeAreaUtils.h"
 
+#include <type_traits>
+#include <utility>
+
 using namespace facebook::react;
+
+namespace {
+
+// EventQueue::UpdateMode, and with it unstable_Immediate, came in React Native 0.82. It is detected
+// instead of checked against a version, so older React Native and react-native-macos (which has its
+// own version numbers) still build and keep the default asynchronous update.
+template <typename Queue, typename = void>
+struct SupportsImmediateStateUpdate : std::false_type {};
+
+template <typename Queue>
+struct SupportsImmediateStateUpdate<Queue, std::void_t<decltype(Queue::UpdateMode::unstable_Immediate)>>
+    : std::true_type {};
+
+// Commits the state update right away where React Native supports it, the way react-native-screens
+// updates its screens' state. A commit that arrives while a mount transaction is running is mounted
+// after it (RCTMountingManager queues a follow-up transaction), so this does not nest mounts.
+template <typename Queue = EventQueue, typename State, typename Callback>
+void updateStateImmediately(const State &state, Callback &&callback)
+{
+  if constexpr (SupportsImmediateStateUpdate<Queue>::value) {
+    state->updateState(std::forward<Callback>(callback), Queue::UpdateMode::unstable_Immediate);
+  } else {
+    state->updateState(std::forward<Callback>(callback));
+  }
+}
+
+} // namespace
 
 @interface RNCSafeAreaViewComponentView () <RCTRNCSafeAreaViewViewProtocol>
 @end
@@ -183,17 +213,17 @@ using namespace facebook::react;
     return;
   }
 
-  _state->updateState(
+  // Commit the new insets with the layout pass that changed them (e.g. a rotation), instead of
+  // waiting for the next event beat, which leaves stale insets on screen for some frames in a
+  // busy app.
+  updateStateImmediately(
+      _state,
       [=](RNCSafeAreaViewShadowNode::ConcreteState::Data const &oldData)
           -> RNCSafeAreaViewShadowNode::ConcreteState::SharedData {
         auto newData = oldData;
         newData.insets = RCTEdgeInsetsFromUIEdgeInsets(_currentSafeAreaInsets);
         return std::make_shared<RNCSafeAreaViewShadowNode::ConcreteState::Data const>(newData);
-      },
-      // Commit the new insets with the layout pass that changed them (e.g. a rotation), instead of
-      // waiting for the next event beat, which leaves stale insets on screen for some frames in a
-      // busy app.
-      facebook::react::EventQueue::UpdateMode::unstable_Immediate);
+      });
 }
 
 #pragma mark - RCTComponentViewProtocol
