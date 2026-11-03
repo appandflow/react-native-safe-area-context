@@ -31,10 +31,12 @@ let package = Package(
             cSettings: [
                 .headerSearchPath("common/cpp"),
                 .headerSearchPath("ios"),
+                .define("RCT_NEW_ARCH_ENABLED", to: "1"),
             ],
             cxxSettings: [
                 .headerSearchPath("common/cpp"),
                 .headerSearchPath("ios"),
+                .define("RCT_NEW_ARCH_ENABLED", to: "1"),
                 .define("DEBUG", .when(configuration: .debug)),
                 .define("NDEBUG", .when(configuration: .release)),
             ],
