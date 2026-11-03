@@ -152,8 +152,10 @@ describe('Package.swift', () => {
             settings: [
               ['c', 'headerSearchPath', 'common/cpp'],
               ['c', 'headerSearchPath', 'ios'],
+              ['c', 'define', 'RCT_NEW_ARCH_ENABLED=1'],
               ['cxx', 'headerSearchPath', 'common/cpp'],
               ['cxx', 'headerSearchPath', 'ios'],
+              ['cxx', 'define', 'RCT_NEW_ARCH_ENABLED=1'],
               ['cxx', 'define', 'DEBUG', 'debug'],
               ['cxx', 'define', 'NDEBUG', 'release'],
               ['linker', 'linkedFramework', 'UIKit'],
