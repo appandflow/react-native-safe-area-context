@@ -9,14 +9,11 @@ import android.view.ViewTreeObserver
 import android.view.WindowInsets
 import com.facebook.react.bridge.Arguments
 import com.facebook.react.uimanager.StateWrapper
-import com.facebook.react.uimanager.UIManagerModule
 import com.facebook.react.views.view.ReactViewGroup
 
 class SafeAreaView(context: Context?) :
     ReactViewGroup(context), ViewTreeObserver.OnPreDrawListener {
-  private var mMode = SafeAreaViewMode.PADDING
   private var mInsets: EdgeInsets? = null
-  private var mEdges: SafeAreaViewEdges? = null
   private var mCornerAdaptation = CornerAdaptation.NONE
   private var mLastSafeAreaInsets: EdgeInsets? = null
   private var mLastProviderFrame: Rect? = null
@@ -36,38 +33,13 @@ class SafeAreaView(context: Context?) :
   private fun updateInsets() {
     val insets = mInsets
     if (insets != null) {
-      val edges =
-          mEdges
-              ?: SafeAreaViewEdges(
-                  SafeAreaViewEdgeModes.ADDITIVE,
-                  SafeAreaViewEdgeModes.ADDITIVE,
-                  SafeAreaViewEdgeModes.ADDITIVE,
-                  SafeAreaViewEdgeModes.ADDITIVE,
-              )
       val stateWrapper = getStateWrapper()
       if (stateWrapper != null) {
         val map = Arguments.createMap()
         map.putMap("insets", edgeInsetsToJsMap(insets))
         stateWrapper.updateState(map)
-      } else {
-        val localData = SafeAreaViewLocalData(insets = insets, mode = mMode, edges = edges)
-        val reactContext = getReactContext(this)
-        val uiManager = reactContext.getNativeModule(UIManagerModule::class.java)
-        if (uiManager != null) {
-          uiManager.setViewLocalData(id, localData)
-        }
       }
     }
-  }
-
-  fun setMode(mode: SafeAreaViewMode) {
-    mMode = mode
-    updateInsets()
-  }
-
-  fun setEdges(edges: SafeAreaViewEdges) {
-    mEdges = edges
-    updateInsets()
   }
 
   fun setCornerAdaptation(cornerAdaptation: CornerAdaptation) {

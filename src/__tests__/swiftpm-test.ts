@@ -141,7 +141,7 @@ describe('Package.swift', () => {
             name: 'ReactNativeSafeAreaContext',
             path: '.',
             sources: ['ios', 'common/cpp'],
-            exclude: ['ios/RNSafeAreaContext.xcodeproj'],
+            exclude: [],
             publicHeadersPath: 'ios',
             products: [
               ['ReactHeaders', 'ReactNative'],

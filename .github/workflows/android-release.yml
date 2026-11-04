@@ -35,7 +35,7 @@ jobs:
         working-directory: example
 
       - name: Build Android example app
-        run: ./gradlew assembleRelease -PnewArchEnabled=true
+        run: ./gradlew assembleRelease
         working-directory: example/android
 
       - name: Upload APK to Release

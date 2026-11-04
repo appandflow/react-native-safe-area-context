@@ -8,8 +8,6 @@ import com.facebook.react.module.model.ReactModuleInfo
 import com.facebook.react.module.model.ReactModuleInfoProvider
 import com.facebook.react.uimanager.ViewManager
 
-// Fool autolinking for older versions that do not support BaseReactPackage.
-// public class SafeAreaContextPackage implements ReactPackage {
 class SafeAreaContextPackage : BaseReactPackage() {
   override fun getModule(name: String, reactContext: ReactApplicationContext): NativeModule? {
     return when (name) {
@@ -30,7 +28,7 @@ class SafeAreaContextPackage : BaseReactPackage() {
               true,
               reactModule.needsEagerInit,
               reactModule.isCxxModule,
-              BuildConfig.IS_NEW_ARCHITECTURE_ENABLED,
+              true,
           )
     }
     return ReactModuleInfoProvider { reactModuleInfoMap }
