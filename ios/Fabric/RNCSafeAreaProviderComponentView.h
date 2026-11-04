@@ -10,6 +10,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface RNCSafeAreaProviderComponentView : RCTViewComponentView
 
+@property (nonatomic, readonly) BOOL ignoreSystemBarsVisibility;
+
 extern NSString *const RNCSafeAreaDidChange;
 
 @end

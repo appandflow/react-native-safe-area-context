@@ -290,6 +290,62 @@ describe('SafeAreaContext', () => {
       );
     });
   });
+
+  describe('ignoreSystemBarsVisibility', () => {
+    function readIgnoreSystemBarsVisibility(testID: string) {
+      return screen.getByTestId(testID).props.ignoreSystemBarsVisibility;
+    }
+
+    it('is off by default', () => {
+      render(<SafeAreaProvider testID="provider" />);
+      expect(readIgnoreSystemBarsVisibility('provider')).toBe(false);
+    });
+
+    it('passes the prop to the native provider', () => {
+      render(<SafeAreaProvider testID="provider" ignoreSystemBarsVisibility />);
+      expect(readIgnoreSystemBarsVisibility('provider')).toBe(true);
+    });
+
+    it('inherits the value of the parent provider', () => {
+      render(
+        <SafeAreaProvider
+          initialMetrics={TEST_METRICS_1}
+          ignoreSystemBarsVisibility
+        >
+          <SafeAreaProvider testID="inner" />
+        </SafeAreaProvider>,
+      );
+      expect(readIgnoreSystemBarsVisibility('inner')).toBe(true);
+    });
+
+    it('lets a nested provider override the parent value', () => {
+      render(
+        <SafeAreaProvider
+          initialMetrics={TEST_METRICS_1}
+          ignoreSystemBarsVisibility
+        >
+          <SafeAreaProvider
+            testID="inner"
+            initialMetrics={TEST_METRICS_1}
+            ignoreSystemBarsVisibility={false}
+          >
+            <SafeAreaProvider testID="innermost" />
+          </SafeAreaProvider>
+        </SafeAreaProvider>,
+      );
+      expect(readIgnoreSystemBarsVisibility('inner')).toBe(false);
+      expect(readIgnoreSystemBarsVisibility('innermost')).toBe(false);
+    });
+
+    it('stays off under a parent that does not set it', () => {
+      render(
+        <SafeAreaProvider initialMetrics={TEST_METRICS_1}>
+          <SafeAreaProvider testID="inner" />
+        </SafeAreaProvider>,
+      );
+      expect(readIgnoreSystemBarsVisibility('inner')).toBe(false);
+    });
+  });
 });
 
 const PlainConsumer = React.memo(({ onRender }: { onRender: () => void }) => (

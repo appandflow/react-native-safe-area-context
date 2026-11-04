@@ -77,4 +77,30 @@ BOOL RNCSafeAreaCornerInputsEqual(RNCSafeAreaCornerInputs inputs1, RNCSafeAreaCo
       CGRectEqualToRect(inputs1.frameInWindow, inputs2.frameInWindow) &&
       CGRectEqualToRect(inputs1.windowFrame, inputs2.windowFrame);
 }
+
+CGFloat RNCSafeAreaStatusBarTopInset(UIView *view)
+{
+#if TARGET_OS_IOS
+  if (@available(iOS 13.0, *)) {
+    UIWindow *window = view.window;
+    UIStatusBarManager *statusBarManager = window.windowScene.statusBarManager;
+    if (statusBarManager == nil) {
+      return 0;
+    }
+    // A hidden status bar reports a zero frame, so the last visible height is kept for each vertical size
+    // class. In landscape on iPhone the status bar is hidden by default, so that height stays 0 until it shows.
+    static CGFloat statusBarHeights[3];
+    UIUserInterfaceSizeClass sizeClass = window.traitCollection.verticalSizeClass;
+    CGFloat statusBarHeight = CGRectGetHeight(statusBarManager.statusBarFrame);
+    if (statusBarHeight > 0) {
+      statusBarHeights[sizeClass] = statusBarHeight;
+    } else if (statusBarManager.isStatusBarHidden) {
+      statusBarHeight = statusBarHeights[sizeClass];
+    }
+    CGFloat minY = CGRectGetMinY([view convertRect:view.bounds toView:nil]);
+    return MAX(statusBarHeight - minY, 0);
+  }
+#endif
+  return 0;
+}
 #endif

@@ -168,6 +168,10 @@ void updateStateImmediately(const State &state, Callback &&callback)
   }
 #if TARGET_OS_IPHONE
   UIEdgeInsets safeAreaInsets = [self providerSafeAreaInsetsMeasuringCorners:measureCorners];
+  if ([_providerView isKindOfClass:RNCSafeAreaProviderComponentView.class] &&
+      ((RNCSafeAreaProviderComponentView *)_providerView).ignoreSystemBarsVisibility) {
+    safeAreaInsets.top = MAX(safeAreaInsets.top, RNCSafeAreaStatusBarTopInset(_providerView));
+  }
 
   if (UIEdgeInsetsEqualToEdgeInsetsWithThreshold(safeAreaInsets, _currentSafeAreaInsets, 1.0 / RCTScreenScale())) {
     return;

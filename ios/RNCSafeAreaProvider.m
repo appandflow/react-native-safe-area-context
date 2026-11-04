@@ -54,6 +54,15 @@
   return self;
 }
 
+- (void)setIgnoreSystemBarsVisibility:(BOOL)ignoreSystemBarsVisibility
+{
+  if (_ignoreSystemBarsVisibility == ignoreSystemBarsVisibility) {
+    return;
+  }
+  _ignoreSystemBarsVisibility = ignoreSystemBarsVisibility;
+  [self invalidateSafeAreaInsets];
+}
+
 - (void)safeAreaInsetsDidChange
 {
   [self invalidateSafeAreaInsetsMeasuringCorners:YES];
@@ -84,6 +93,12 @@
   }
   UIEdgeInsets verticalCornerAdaptedInsets = _measuredVerticalCornerAdaptedInsets;
   UIEdgeInsets horizontalCornerAdaptedInsets = _measuredHorizontalCornerAdaptedInsets;
+  if (_ignoreSystemBarsVisibility) {
+    CGFloat statusBarTopInset = RNCSafeAreaStatusBarTopInset(self);
+    safeAreaInsets.top = MAX(safeAreaInsets.top, statusBarTopInset);
+    verticalCornerAdaptedInsets.top = MAX(verticalCornerAdaptedInsets.top, statusBarTopInset);
+    horizontalCornerAdaptedInsets.top = MAX(horizontalCornerAdaptedInsets.top, statusBarTopInset);
+  }
 #elif TARGET_OS_OSX
   NSEdgeInsets safeAreaInsets;
   if (@available(macOS 11.0, *)) {

@@ -35,4 +35,6 @@ typedef struct RNCSafeAreaCornerInputs {
 
 RCT_EXTERN RNCSafeAreaCornerInputs RNCSafeAreaCornerInputsMake(UIView *view, UIEdgeInsets safeAreaInsets);
 RCT_EXTERN BOOL RNCSafeAreaCornerInputsEqual(RNCSafeAreaCornerInputs inputs1, RNCSafeAreaCornerInputs inputs2);
+
+RCT_EXTERN CGFloat RNCSafeAreaStatusBarTopInset(UIView *view);
 #endif

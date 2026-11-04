@@ -28,6 +28,14 @@ Optional, defaults to `null`.
 
 Can be used to provide the initial value for frame and insets, this allows rendering immediately. See [optimization](/optimizations) for more information on how to use this prop.
 
+#### `ignoreSystemBarsVisibility`
+
+Optional, defaults to the value of the nearest parent `SafeAreaProvider`, or `false` without one.
+
+When `true`, the insets keep the space of the status bar and the navigation bar while they are hidden, so content does not jump when the bars hide or show. On Android this uses `getInsetsIgnoringVisibility` on API 30+ and the stable insets on API 23-29. On iOS the top inset keeps the last visible status bar height. On web this prop has no effect.
+
+A nested `SafeAreaProvider` without this prop uses the value of its parent. Set it to `false` to turn it off for a subtree.
+
 #### `ref`
 
 Optional ref to the underlying view.
