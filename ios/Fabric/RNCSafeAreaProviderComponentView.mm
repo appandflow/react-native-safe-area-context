@@ -53,6 +53,18 @@ using namespace facebook::react;
     [self registerNotifications];
   }
 }
+
+- (void)didMoveToWindow
+{
+  [super didMoveToWindow];
+
+  // Insets measured while outside a window are skipped, so measure again on entry. safeAreaInsetsDidChange only
+  // fires when the value changes, which it may not if the in-window insets equal the zero held outside the window.
+  // Ask for a layout pass instead of reading here: UIKit may not have updated safeAreaInsets yet.
+  if (self.window != nil) {
+    [self setNeedsLayout];
+  }
+}
 #endif
 
 - (void)registerNotifications
@@ -88,6 +100,13 @@ using namespace facebook::react;
   if (self.superview == nil) {
     return;
   }
+#if !TARGET_OS_OSX
+  // A view outside a window reports zero safeAreaInsets, e.g. a tab of a native tab container that has not been
+  // selected yet. Keyboard notifications would send that zero to JS, so wait until the view enters a window.
+  if (self.window == nil) {
+    return;
+  }
+#endif
   // This gets called before the view size is set by react-native so
   // make sure to wait so we don't set wrong insets to JS.
   if (CGSizeEqualToSize(self.frame.size, CGSizeZero)) {
