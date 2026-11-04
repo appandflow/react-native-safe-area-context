@@ -52,6 +52,7 @@ export interface NativeSafeAreaProviderProps extends ViewProps {
   ref?: React.Ref<View>;
   children?: React.ReactNode;
   onInsetsChange: InsetChangeNativeCallback;
+  ignoreSystemBarsVisibility?: boolean;
 }
 
 export interface NativeSafeAreaViewProps extends ViewProps {
