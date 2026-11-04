@@ -10,14 +10,21 @@ import kotlin.math.max
 import kotlin.math.min
 
 @RequiresApi(Build.VERSION_CODES.R)
-private fun getRootWindowInsetsCompatR(windowInsets: WindowInsets?): EdgeInsets? {
+private fun getRootWindowInsetsCompatR(
+    windowInsets: WindowInsets?,
+    ignoreSystemBarsVisibility: Boolean,
+): EdgeInsets? {
+  if (windowInsets == null) {
+    return null
+  }
+  val types =
+      WindowInsets.Type.statusBars() or
+          WindowInsets.Type.displayCutout() or
+          WindowInsets.Type.navigationBars() or
+          WindowInsets.Type.captionBar()
   val insets =
-      windowInsets?.getInsets(
-          WindowInsets.Type.statusBars() or
-              WindowInsets.Type.displayCutout() or
-              WindowInsets.Type.navigationBars() or
-              WindowInsets.Type.captionBar()
-      ) ?: return null
+      if (ignoreSystemBarsVisibility) windowInsets.getInsetsIgnoringVisibility(types)
+      else windowInsets.getInsets(types)
   return EdgeInsets(
       top = insets.top.toFloat(),
       right = insets.right.toFloat(),
@@ -44,6 +51,19 @@ private fun getRootWindowInsetsCompatM(windowInsets: WindowInsets?): EdgeInsets?
   )
 }
 
+@RequiresApi(Build.VERSION_CODES.M)
+@Suppress("DEPRECATION")
+private fun getStableWindowInsetsCompatM(windowInsets: WindowInsets?): EdgeInsets? {
+  val insets = windowInsets ?: return null
+  val cutout = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) insets.displayCutout else null
+  return EdgeInsets(
+      top = max(insets.stableInsetTop, cutout?.safeInsetTop ?: 0).toFloat(),
+      right = max(insets.stableInsetRight, cutout?.safeInsetRight ?: 0).toFloat(),
+      bottom = max(insets.stableInsetBottom, cutout?.safeInsetBottom ?: 0).toFloat(),
+      left = max(insets.stableInsetLeft, cutout?.safeInsetLeft ?: 0).toFloat(),
+  )
+}
+
 private fun getRootWindowInsetsCompatBase(rootView: View): EdgeInsets? {
   val visibleRect = android.graphics.Rect()
   rootView.getWindowVisibleDisplayFrame(visibleRect)
@@ -58,12 +78,18 @@ private fun getRootWindowInsetsCompatBase(rootView: View): EdgeInsets? {
 private fun getRootWindowInsetsCompat(
     rootView: View,
     dispatchedInsets: WindowInsets?,
+    ignoreSystemBarsVisibility: Boolean,
 ): EdgeInsets? {
   return when {
     Build.VERSION.SDK_INT >= Build.VERSION_CODES.R ->
         maxInsets(
-            getRootWindowInsetsCompatR(rootView.rootWindowInsets),
-            getRootWindowInsetsCompatR(dispatchedInsets),
+            getRootWindowInsetsCompatR(rootView.rootWindowInsets, ignoreSystemBarsVisibility),
+            getRootWindowInsetsCompatR(dispatchedInsets, ignoreSystemBarsVisibility),
+        )
+    Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && ignoreSystemBarsVisibility ->
+        maxInsets(
+            getStableWindowInsetsCompatM(rootView.rootWindowInsets),
+            getStableWindowInsetsCompatM(dispatchedInsets),
         )
     Build.VERSION.SDK_INT >= Build.VERSION_CODES.M ->
         maxInsets(
@@ -119,13 +145,19 @@ internal class DispatchedWindowInsets {
 }
 
 @JvmOverloads
-fun getSafeAreaInsets(view: View, dispatchedInsets: WindowInsets? = null): EdgeInsets? {
+fun getSafeAreaInsets(
+    view: View,
+    dispatchedInsets: WindowInsets? = null,
+    ignoreSystemBarsVisibility: Boolean = false,
+): EdgeInsets? {
   // The view has not been layout yet.
   if (view.height == 0) {
     return null
   }
   val rootView = view.rootView
-  val windowInsets = getRootWindowInsetsCompat(rootView, dispatchedInsets) ?: return null
+  val windowInsets =
+      getRootWindowInsetsCompat(rootView, dispatchedInsets, ignoreSystemBarsVisibility)
+          ?: return null
 
   // Calculate the part of the view that overlaps with window insets.
   val windowWidth = rootView.width.toFloat()
