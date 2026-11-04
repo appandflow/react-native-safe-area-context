@@ -1,0 +1,220 @@
+#!/bin/bash
+
+set -euo pipefail
+IFS=$'\n\t'
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+DEFAULT_PROJECT_NAME="SafeAreaContextTest"
+DEFAULT_PLATFORMS="android"
+RNC_CLI_VERSION="${RNC_CLI_VERSION:-20.2.0}"
+
+usage() {
+  cat <<'USAGE'
+Create a throwaway React Native app that depends on the current
+react-native-safe-area-context checkout, and build it.
+
+USAGE:
+  ./scripts/test-project --version <react_native_version> [options]
+
+REQUIRED ARGUMENTS:
+  --version, -v     React Native version to init the test app with
+
+OPTIONS:
+  --platforms       Comma separated list: android, ios. Default: android
+  --release         Build Release instead of Debug
+  --project-name    Name of the temporary project. Default: SafeAreaContextTest
+  --keep-project    Do not delete the temp project (for debugging failures)
+  -h, --help        Print this message
+
+ENVIRONMENT:
+  RNC_CLI_VERSION   @react-native-community/cli version used for `init`.
+                    Default: 20.2.0.
+USAGE
+}
+
+RN_VERSION=""
+PLATFORMS="$DEFAULT_PLATFORMS"
+PROJECT_NAME="$DEFAULT_PROJECT_NAME"
+KEEP_PROJECT=0
+BUILD_CONFIG="Debug"
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --version|-v)
+      RN_VERSION=${2:-}
+      if [[ -z "$RN_VERSION" ]]; then
+        echo "Error! --version requires a value." >&2
+        usage
+        exit 1
+      fi
+      shift 2
+      ;;
+    --platforms)
+      PLATFORMS=${2:-}
+      if [[ -z "$PLATFORMS" ]]; then
+        echo "Error! --platforms requires a value." >&2
+        usage
+        exit 1
+      fi
+      shift 2
+      ;;
+    --project-name)
+      PROJECT_NAME=${2:-}
+      if [[ -z "$PROJECT_NAME" ]]; then
+        echo "Error! --project-name requires a value." >&2
+        usage
+        exit 1
+      fi
+      shift 2
+      ;;
+    --release)
+      BUILD_CONFIG="Release"
+      shift
+      ;;
+    --keep-project)
+      KEEP_PROJECT=1
+      shift
+      ;;
+    -h|--help)
+      usage
+      exit 0
+      ;;
+    *)
+      echo "Error! Unknown argument: $1" >&2
+      usage
+      exit 1
+      ;;
+  esac
+done
+
+if [[ -z "$RN_VERSION" ]]; then
+  echo "Error! Missing required --version argument." >&2
+  usage
+  exit 1
+fi
+
+RUN_ANDROID=0
+RUN_IOS=0
+IFS=',' read -r -a PLATFORM_ARRAY <<< "$PLATFORMS"
+for PLATFORM in "${PLATFORM_ARRAY[@]}"; do
+  case "${PLATFORM// }" in
+    android) RUN_ANDROID=1 ;;
+    ios) RUN_IOS=1 ;;
+    "") ;;
+    *)
+      echo "Error! Unknown platform: ${PLATFORM}" >&2
+      exit 1
+      ;;
+  esac
+done
+IFS=$'\n\t'
+
+if [[ $RUN_ANDROID -eq 0 && $RUN_IOS -eq 0 ]]; then
+  echo "Error! At least one platform must be selected." >&2
+  exit 1
+fi
+
+TMP_DIR="$(mktemp -d)"
+PROJECT_DIR="$TMP_DIR/$PROJECT_NAME"
+
+cleanup() {
+  if [[ $KEEP_PROJECT -eq 1 ]]; then
+    echo "Temporary project preserved at: $PROJECT_DIR"
+    return
+  fi
+  if [[ -d "$TMP_DIR" ]]; then
+    rm -rf "$TMP_DIR"
+  fi
+}
+trap cleanup EXIT
+
+cd "$REPO_ROOT"
+
+echo "==> Packing react-native-safe-area-context"
+PACK_OUTPUT="$(npm pack --pack-destination "$TMP_DIR")"
+TARBALL_FILENAME="$(echo "$PACK_OUTPUT" | tail -n 1 | tr -d '\r\n')"
+TARBALL_PATH="$TMP_DIR/$TARBALL_FILENAME"
+
+echo "==> Creating React Native $RN_VERSION project ($PROJECT_NAME) in $TMP_DIR"
+cd "$TMP_DIR"
+npx "@react-native-community/cli@$RNC_CLI_VERSION" init "$PROJECT_NAME" \
+  --version "$RN_VERSION" \
+  --skip-git-init \
+  --install-pods false
+
+echo "==> Installing local tarball"
+cd "$PROJECT_DIR"
+npm install "file:$TARBALL_PATH"
+
+echo "==> Writing smoke-test App.tsx"
+cat > App.tsx <<'APP'
+import React from 'react';
+import { Text } from 'react-native';
+import {
+  SafeAreaProvider,
+  SafeAreaView,
+  useSafeAreaInsets,
+} from 'react-native-safe-area-context';
+
+function Inner() {
+  const insets = useSafeAreaInsets();
+  return (
+    <SafeAreaView edges={['top', 'bottom']}>
+      <Text>{`top: ${insets.top}`}</Text>
+    </SafeAreaView>
+  );
+}
+
+export default function App() {
+  return (
+    <SafeAreaProvider>
+      <Inner />
+    </SafeAreaProvider>
+  );
+}
+APP
+
+if [[ $RUN_ANDROID -eq 1 ]]; then
+  echo "==> Bundling JavaScript for Android"
+  npx react-native bundle \
+    --entry-file index.js \
+    --platform android \
+    --dev false \
+    --bundle-output "$TMP_DIR/main.android.jsbundle"
+
+  echo "==> Building Android ($BUILD_CONFIG)"
+  (
+    cd android
+    ./gradlew "assemble$BUILD_CONFIG" --console=plain
+  )
+fi
+
+if [[ $RUN_IOS -eq 1 ]]; then
+  echo "==> Bundling JavaScript for iOS"
+  npx react-native bundle \
+    --entry-file index.js \
+    --platform ios \
+    --dev false \
+    --bundle-output "$TMP_DIR/main.ios.jsbundle"
+
+  echo "==> Installing iOS dependencies"
+  bundle install
+  (
+    cd ios
+    bundle exec pod install
+
+    echo "==> Building iOS ($BUILD_CONFIG)"
+    xcodebuild \
+      -workspace "$PROJECT_NAME.xcworkspace" \
+      -configuration "$BUILD_CONFIG" \
+      -scheme "$PROJECT_NAME" \
+      -destination 'generic/platform=iOS Simulator' \
+      -derivedDataPath "$TMP_DIR/DerivedData" \
+      CODE_SIGNING_ALLOWED=NO \
+      ONLY_ACTIVE_ARCH=NO \
+      -quiet
+  )
+fi
+
+echo "==> All requested builds finished successfully."
