@@ -29,9 +29,8 @@ for (const required of [
   'README.md',
   'LICENSE',
   'src/index.tsx',
-  'src/specs/NativeSafeAreaProvider.ts',
-  'src/specs/NativeSafeAreaView.ts',
-  'lib/commonjs/index.js',
+  'src/specs/SafeAreaProviderNativeComponent.ts',
+  'src/specs/SafeAreaViewNativeComponent.ts',
   'lib/module/index.js',
   'lib/typescript/src/index.d.ts',
   'react-native-safe-area-context.podspec',
@@ -40,19 +39,34 @@ for (const required of [
   'ios/RNCSafeAreaContext.mm',
   'android/build.gradle',
   'common/cpp/react/renderer/components/safeareacontext/RNCSafeAreaViewShadowNode.cpp',
-  'jest/mock.js',
+  'lib/module/jest/mock.js',
+  'lib/typescript/src/jest/mock.d.ts',
 ]) {
   if (!entries.includes(`package/${required}`)) {
     throw new Error(`Missing package file: ${required}`);
   }
 }
 
-for (const field of ['main', 'module', 'types', 'react-native', 'source']) {
+for (const field of ['main', 'types']) {
   const target = manifest[field];
   if (!target || !entries.includes(`package/${target.replace(/^\.\//, '')}`)) {
     throw new Error(`Missing ${field} target: ${target ?? '<unset>'}`);
   }
 }
+
+function checkExportTargets(value) {
+  if (typeof value === 'string') {
+    if (!entries.includes(`package/${value.replace(/^\.\//, '')}`)) {
+      throw new Error(`Missing export target: ${value}`);
+    }
+  } else if (value && typeof value === 'object') {
+    for (const target of Object.values(value)) {
+      checkExportTargets(target);
+    }
+  }
+}
+
+checkExportTargets(manifest.exports);
 
 for (const entry of entries) {
   if (/^package\/(?:android|ios)\/(?:.*\/)?build\//.test(entry)) {
