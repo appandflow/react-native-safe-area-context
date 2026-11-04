@@ -7,6 +7,7 @@
 RCT_EXPORT_MODULE(RNCSafeAreaProvider)
 
 RCT_EXPORT_VIEW_PROPERTY(onInsetsChange, RCTDirectEventBlock)
+RCT_EXPORT_VIEW_PROPERTY(ignoreSystemBarsVisibility, BOOL)
 
 #if TARGET_OS_IPHONE
 - (UIView *)view
