@@ -201,6 +201,15 @@ describe('NativeSafeAreaProvider.web', () => {
     });
   });
 
+  it('does not grow insets when the provider extends beyond every viewport edge', () => {
+    // A root provider can contain a scrolling document taller and wider than
+    // the viewport. Negative edge distances must not inflate safe-area values.
+    rectMock.mockReturnValue(makeRect(-500, -500, 2048, 2690));
+    const onInsetsChange = jest.fn<InsetChangeNativeCallback>();
+    mountProvider(onInsetsChange);
+    expect(lastMetrics(onInsetsChange).insets).toEqual(WINDOW_INSETS);
+  });
+
   it('reports window insets and frame for a full-viewport provider', () => {
     rectMock.mockReturnValue(makeRect(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT));
     const onInsetsChange = jest.fn<InsetChangeNativeCallback>();
