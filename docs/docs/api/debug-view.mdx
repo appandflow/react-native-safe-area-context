@@ -1,0 +1,42 @@
+---
+sidebar_position: 11
+title: DebugView
+sidebar_label: DebugView
+---
+
+`DebugView` is a development helper that draws the safe area insets of the nearest [`SafeAreaProvider`](./safe-area-provider.mdx) on top of your UI, so you can check visually how your views interact with the safe area.
+
+It is absolutely positioned, fills its parent and never intercepts touches. Each inset is drawn as a translucent band labeled with its value.
+
+Since React Native doesn't tree shake, `DebugView` is not exported from the main entry point. Import it from the `react-native-safe-area-context/DebugView` subpath so it is only bundled when you use it.
+
+### Example
+
+```tsx
+import DebugView from 'react-native-safe-area-context/DebugView';
+
+function App() {
+  return (
+    <SafeAreaProvider>
+      <Content />
+      {__DEV__ ? <DebugView /> : null}
+    </SafeAreaProvider>
+  );
+}
+```
+
+### Props
+
+Accepts all [View](https://reactnative.dev/docs/view) props.
+
+#### `color`
+
+Optional, defaults to `rgba(255, 0, 0, 0.3)`.
+
+Color of the bands drawn over the insets.
+
+#### `showLabels`
+
+Optional, defaults to `true`.
+
+Whether to print the value of each inset (for example `top: 47`) in its band.
