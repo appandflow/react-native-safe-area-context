@@ -1,6 +1,7 @@
 package com.th3rdwave.safeareacontext
 
 import com.facebook.react.BaseReactPackage
+import com.facebook.react.ViewManagerOnDemandReactPackage
 import com.facebook.react.bridge.NativeModule
 import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.module.annotations.ReactModule
@@ -10,7 +11,7 @@ import com.facebook.react.uimanager.ViewManager
 
 // Fool autolinking for older versions that do not support BaseReactPackage.
 // public class SafeAreaContextPackage implements ReactPackage {
-class SafeAreaContextPackage : BaseReactPackage() {
+class SafeAreaContextPackage : BaseReactPackage(), ViewManagerOnDemandReactPackage {
   override fun getModule(name: String, reactContext: ReactApplicationContext): NativeModule? {
     return when (name) {
       SafeAreaContextModule.NAME -> SafeAreaContextModule(reactContext)
@@ -38,5 +39,22 @@ class SafeAreaContextPackage : BaseReactPackage() {
 
   override fun createViewManagers(reactContext: ReactApplicationContext): List<ViewManager<*, *>> {
     return listOf<ViewManager<*, *>>(SafeAreaProviderManager(), SafeAreaViewManager())
+  }
+
+  // React Native builds the config (props and events) of an on-demand view manager when JS first
+  // uses that view, instead of building the configs of all view managers at startup.
+  override fun getViewManagerNames(reactContext: ReactApplicationContext): Collection<String> {
+    return listOf(SafeAreaProviderManager.REACT_CLASS, SafeAreaViewManager.REACT_CLASS)
+  }
+
+  override fun createViewManager(
+      reactContext: ReactApplicationContext,
+      viewManagerName: String,
+  ): ViewManager<*, *>? {
+    return when (viewManagerName) {
+      SafeAreaProviderManager.REACT_CLASS -> SafeAreaProviderManager()
+      SafeAreaViewManager.REACT_CLASS -> SafeAreaViewManager()
+      else -> null
+    }
   }
 }
