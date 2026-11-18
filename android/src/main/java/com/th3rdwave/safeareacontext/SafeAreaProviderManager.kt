@@ -5,6 +5,7 @@ import com.facebook.react.module.annotations.ReactModule
 import com.facebook.react.uimanager.ThemedReactContext
 import com.facebook.react.uimanager.UIManagerHelper
 import com.facebook.react.uimanager.ViewGroupManager
+import com.facebook.react.uimanager.annotations.ReactProp
 import com.facebook.react.viewmanagers.RNCSafeAreaProviderManagerDelegate
 import com.facebook.react.viewmanagers.RNCSafeAreaProviderManagerInterface
 
@@ -18,6 +19,11 @@ class SafeAreaProviderManager :
   override fun getName() = REACT_CLASS
 
   public override fun createViewInstance(context: ThemedReactContext) = SafeAreaProvider(context)
+
+  @ReactProp(name = "ignoreSystemBarsVisibility")
+  override fun setIgnoreSystemBarsVisibility(view: SafeAreaProvider, value: Boolean) {
+    view.setIgnoreSystemBarsVisibility(value)
+  }
 
   override fun getExportedCustomDirectEventTypeConstants() =
       mutableMapOf(

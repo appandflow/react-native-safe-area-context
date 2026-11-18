@@ -18,6 +18,8 @@ NS_ASSUME_NONNULL_BEGIN
 // need to be coalesced before sending, for performance reasons.
 @property (nonatomic, copy) RCTBubblingEventBlock onInsetsChange;
 
+@property (nonatomic, assign) BOOL ignoreSystemBarsVisibility;
+
 @end
 
 NS_ASSUME_NONNULL_END

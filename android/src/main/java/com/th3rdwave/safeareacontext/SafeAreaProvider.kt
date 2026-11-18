@@ -24,12 +24,17 @@ class SafeAreaProvider(context: Context?) :
   private var mLastFrame: Rect? = null
   private var mLastCorners: List<RoundedCorner?>? = null
   private val mDispatchedInsets = DispatchedWindowInsets()
+  private var mIgnoreSystemBarsVisibility = false
 
   internal fun getDispatchedWindowInsets(): WindowInsets? = mDispatchedInsets.get(this)
 
+  internal fun getIgnoreSystemBarsVisibility(): Boolean = mIgnoreSystemBarsVisibility
+
   private fun maybeUpdateInsets() {
     val insetsChangeHandler = mInsetsChangeHandler ?: return
-    val edgeInsets = getSafeAreaInsets(this, getDispatchedWindowInsets()) ?: return
+    val edgeInsets =
+        getSafeAreaInsets(this, getDispatchedWindowInsets(), mIgnoreSystemBarsVisibility)
+            ?: return
     val frame = getFrame(rootView as ViewGroup, this) ?: return
     val corners = getRoundedCorners(this)
     if (mLastInsets != edgeInsets || mLastFrame != frame || mLastCorners != corners) {
@@ -70,6 +75,15 @@ class SafeAreaProvider(context: Context?) :
   override fun onPreDraw(): Boolean {
     maybeUpdateInsets()
     return true
+  }
+
+  fun setIgnoreSystemBarsVisibility(ignoreSystemBarsVisibility: Boolean) {
+    if (mIgnoreSystemBarsVisibility == ignoreSystemBarsVisibility) {
+      return
+    }
+    mIgnoreSystemBarsVisibility = ignoreSystemBarsVisibility
+    maybeUpdateInsets()
+    invalidate()
   }
 
   fun setOnInsetsChangeHandler(handler: OnInsetsChangeHandler?) {

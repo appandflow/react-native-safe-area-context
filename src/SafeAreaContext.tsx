@@ -36,10 +36,22 @@ if (isDev) {
     'SafeAreaCornerAdaptedInsetsContext';
 }
 
+const SafeAreaIgnoreSystemBarsVisibilityContext = React.createContext(false);
+if (isDev) {
+  SafeAreaIgnoreSystemBarsVisibilityContext.displayName =
+    'SafeAreaIgnoreSystemBarsVisibilityContext';
+}
+
 export interface SafeAreaProviderProps extends ViewProps {
   ref?: React.Ref<View>;
   children?: React.ReactNode;
   initialMetrics?: Metrics | null;
+  /**
+   * Report the insets as if the system bars were visible, so hiding or
+   * showing the status bar or the Android navigation bar does not change
+   * them. Defaults to the value of the parent provider, or `false`.
+   */
+  ignoreSystemBarsVisibility?: boolean;
   /**
    * @deprecated
    */
@@ -50,10 +62,16 @@ export function SafeAreaProvider({
   children,
   initialMetrics,
   initialSafeAreaInsets,
+  ignoreSystemBarsVisibility: ignoreSystemBarsVisibilityProp,
   style,
   ref,
   ...others
 }: SafeAreaProviderProps) {
+  const parentIgnoreSystemBarsVisibility = React.useContext(
+    SafeAreaIgnoreSystemBarsVisibilityContext,
+  );
+  const ignoreSystemBarsVisibility =
+    ignoreSystemBarsVisibilityProp ?? parentIgnoreSystemBarsVisibility;
   const parentInsets = useParentSafeAreaInsets();
   const parentFrame = useParentSafeAreaFrame();
   const parentCornerInsets = React.useContext(
@@ -148,6 +166,7 @@ export function SafeAreaProvider({
       ref={ref}
       style={[styles.fill, style]}
       onInsetsChange={onInsetsChange}
+      ignoreSystemBarsVisibility={ignoreSystemBarsVisibility}
       {...others}
     >
       {insets != null ? (
@@ -156,7 +175,11 @@ export function SafeAreaProvider({
             <SafeAreaCornerAdaptedInsetsContext.Provider
               value={cornerInsetsValue}
             >
-              {children}
+              <SafeAreaIgnoreSystemBarsVisibilityContext.Provider
+                value={ignoreSystemBarsVisibility}
+              >
+                {children}
+              </SafeAreaIgnoreSystemBarsVisibilityContext.Provider>
             </SafeAreaCornerAdaptedInsetsContext.Provider>
           </SafeAreaInsetsContext.Provider>
         </SafeAreaFrameContext.Provider>

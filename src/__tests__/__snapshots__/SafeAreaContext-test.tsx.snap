@@ -2,6 +2,7 @@
 
 exports[`SafeAreaContext does not render child until inset values are received 1`] = `
 <RNCSafeAreaProvider
+  ignoreSystemBarsVisibility={false}
   onInsetsChange={[Function]}
   style={
     [
@@ -16,6 +17,7 @@ exports[`SafeAreaContext does not render child until inset values are received 1
 
 exports[`SafeAreaContext renders 1`] = `
 <RNCSafeAreaProvider
+  ignoreSystemBarsVisibility={false}
   onInsetsChange={[Function]}
   style={
     [
@@ -30,6 +32,7 @@ exports[`SafeAreaContext renders 1`] = `
 
 exports[`SafeAreaContext renders child when inset values are received 1`] = `
 <RNCSafeAreaProvider
+  ignoreSystemBarsVisibility={false}
   onInsetsChange={[Function]}
   style={
     [
@@ -45,6 +48,7 @@ exports[`SafeAreaContext renders child when inset values are received 1`] = `
 
 exports[`SafeAreaContext renders child when inset values are received 2`] = `
 <RNCSafeAreaProvider
+  ignoreSystemBarsVisibility={false}
   onInsetsChange={[Function]}
   style={
     [
@@ -75,6 +79,7 @@ exports[`SafeAreaContext renders child when inset values are received 2`] = `
 
 exports[`SafeAreaContext supports setting initial insets 1`] = `
 <RNCSafeAreaProvider
+  ignoreSystemBarsVisibility={false}
   onInsetsChange={[Function]}
   style={
     [
@@ -104,6 +109,7 @@ exports[`SafeAreaContext supports setting initial insets 1`] = `
 
 exports[`SafeAreaContext uses inner insets 1`] = `
 <RNCSafeAreaProvider
+  ignoreSystemBarsVisibility={false}
   onInsetsChange={[Function]}
   style={
     [
@@ -115,6 +121,7 @@ exports[`SafeAreaContext uses inner insets 1`] = `
   }
 >
   <RNCSafeAreaProvider
+    ignoreSystemBarsVisibility={false}
     onInsetsChange={[Function]}
     style={
       [
@@ -145,6 +152,7 @@ exports[`SafeAreaContext uses inner insets 1`] = `
 
 exports[`SafeAreaContext uses parent insets when available 1`] = `
 <RNCSafeAreaProvider
+  ignoreSystemBarsVisibility={false}
   onInsetsChange={[Function]}
   style={
     [
@@ -156,6 +164,7 @@ exports[`SafeAreaContext uses parent insets when available 1`] = `
   }
 >
   <RNCSafeAreaProvider
+    ignoreSystemBarsVisibility={false}
     onInsetsChange={[Function]}
     style={
       [

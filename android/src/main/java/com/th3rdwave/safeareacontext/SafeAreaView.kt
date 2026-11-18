@@ -81,7 +81,11 @@ class SafeAreaView(context: Context?) :
     val dispatchedInsets =
         if (providerView is SafeAreaProvider) providerView.getDispatchedWindowInsets()
         else mDispatchedInsets.get(this)
-    val safeAreaInsets = getSafeAreaInsets(providerView, dispatchedInsets) ?: return false
+    val ignoreSystemBarsVisibility =
+        providerView is SafeAreaProvider && providerView.getIgnoreSystemBarsVisibility()
+    val safeAreaInsets =
+        getSafeAreaInsets(providerView, dispatchedInsets, ignoreSystemBarsVisibility)
+            ?: return false
     val edgeInsets: EdgeInsets
     if (mCornerAdaptation == CornerAdaptation.NONE) {
       edgeInsets = safeAreaInsets

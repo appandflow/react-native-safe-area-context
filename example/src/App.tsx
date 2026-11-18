@@ -5,6 +5,7 @@ import AdditionalInsetsExample from './AdditionalInsetsExample';
 import CornerAdaptationExample from './CornerAdaptationExample';
 import FormSheetExample from './FormSheetExample';
 import HooksExample from './HooksExample';
+import IgnoreSystemBarsVisibilityExample from './IgnoreSystemBarsVisibilityExample';
 import ListenerExample from './ListenerExample';
 import SafeAreaViewExample from './SafeAreaViewExample';
 import SafeAreaViewEdgesExample from './SafeAreaViewEdgesExample';
@@ -22,7 +23,8 @@ type Example =
   | 'react-navigation'
   | 'native-stack'
   | 'form-sheet'
-  | 'additional-insets';
+  | 'additional-insets'
+  | 'ignore-system-bars-visibility';
 
 export default function App() {
   const [currentExample, setCurrentExample] = React.useState<Example | null>(
@@ -78,6 +80,12 @@ export default function App() {
     DevSettings.addMenuItem('Show Additional Insets Example', () => {
       setCurrentExample('additional-insets');
     });
+    DevSettings.addMenuItem(
+      'Show Ignore System Bars Visibility Example',
+      () => {
+        setCurrentExample('ignore-system-bars-visibility');
+      },
+    );
   }, []);
 
   let content: React.ReactElement<unknown>;
@@ -108,6 +116,9 @@ export default function App() {
       break;
     case 'additional-insets':
       content = <AdditionalInsetsExample />;
+      break;
+    case 'ignore-system-bars-visibility':
+      content = <IgnoreSystemBarsVisibilityExample />;
       break;
     default:
       content = (

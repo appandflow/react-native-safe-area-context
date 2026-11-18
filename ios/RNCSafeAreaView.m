@@ -113,6 +113,9 @@ RCT_NOT_IMPLEMENTED(-(instancetype)initWithFrame : (CGRect)frame)
   }
 #if TARGET_OS_IPHONE
   UIEdgeInsets safeAreaInsets = RNCSafeAreaInsetsWithCornerAdaptation(_providerView, _cornerAdaptation);
+  if (_providerView.ignoreSystemBarsVisibility) {
+    safeAreaInsets.top = MAX(safeAreaInsets.top, RNCSafeAreaStatusBarTopInset(_providerView));
+  }
   if (UIEdgeInsetsEqualToEdgeInsetsWithThreshold(safeAreaInsets, _currentSafeAreaInsets, 1.0 / RCTScreenScale())) {
     return;
   }

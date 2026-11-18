@@ -106,6 +106,12 @@ using namespace facebook::react;
   }
   UIEdgeInsets verticalCornerAdaptedInsets = _measuredVerticalCornerAdaptedInsets;
   UIEdgeInsets horizontalCornerAdaptedInsets = _measuredHorizontalCornerAdaptedInsets;
+  if (_ignoreSystemBarsVisibility) {
+    CGFloat statusBarTopInset = RNCSafeAreaStatusBarTopInset(self);
+    safeAreaInsets.top = MAX(safeAreaInsets.top, statusBarTopInset);
+    verticalCornerAdaptedInsets.top = MAX(verticalCornerAdaptedInsets.top, statusBarTopInset);
+    horizontalCornerAdaptedInsets.top = MAX(horizontalCornerAdaptedInsets.top, statusBarTopInset);
+  }
 #elif TARGET_OS_OSX
   UIEdgeInsets verticalCornerAdaptedInsets = safeAreaInsets;
   UIEdgeInsets horizontalCornerAdaptedInsets = safeAreaInsets;
@@ -185,9 +191,24 @@ using namespace facebook::react;
   return concreteComponentDescriptorProvider<RNCSafeAreaProviderComponentDescriptor>();
 }
 
+- (void)updateProps:(const Props::Shared &)props oldProps:(const Props::Shared &)oldProps
+{
+  const auto &newProps = *std::static_pointer_cast<const RNCSafeAreaProviderProps>(props);
+  BOOL ignoreSystemBarsVisibility = newProps.ignoreSystemBarsVisibility;
+  BOOL ignoreSystemBarsVisibilityChanged = ignoreSystemBarsVisibility != _ignoreSystemBarsVisibility;
+  _ignoreSystemBarsVisibility = ignoreSystemBarsVisibility;
+
+  [super updateProps:props oldProps:oldProps];
+
+  if (ignoreSystemBarsVisibilityChanged) {
+    [self invalidateSafeAreaInsets];
+  }
+}
+
 - (void)prepareForRecycle
 {
   [super prepareForRecycle];
+  _ignoreSystemBarsVisibility = NO;
   _currentSafeAreaInsets = UIEdgeInsetsZero;
   _currentVerticalCornerAdaptedInsets = UIEdgeInsetsZero;
   _currentHorizontalCornerAdaptedInsets = UIEdgeInsetsZero;
