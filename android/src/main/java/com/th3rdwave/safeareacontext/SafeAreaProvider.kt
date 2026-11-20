@@ -29,7 +29,8 @@ class SafeAreaProvider(context: Context?) :
 
   private fun maybeUpdateInsets() {
     val insetsChangeHandler = mInsetsChangeHandler ?: return
-    val edgeInsets = getSafeAreaInsets(this, getDispatchedWindowInsets()) ?: return
+    val windowInsets = getDispatchedWindowInsets()
+    val edgeInsets = getSafeAreaInsets(this, windowInsets) ?: return
     val frame = getFrame(rootView as ViewGroup, this) ?: return
     val corners = getRoundedCorners(this)
     if (mLastInsets != edgeInsets || mLastFrame != frame || mLastCorners != corners) {
@@ -64,6 +65,7 @@ class SafeAreaProvider(context: Context?) :
 
   override fun dispatchApplyWindowInsets(insets: WindowInsets): WindowInsets {
     mDispatchedInsets.update(this, insets)
+    maybeUpdateInsets()
     return super.dispatchApplyWindowInsets(insets)
   }
 
