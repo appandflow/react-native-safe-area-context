@@ -85,7 +85,9 @@ using namespace facebook::react;
 
 - (void)invalidateSafeAreaInsetsMeasuringCorners:(BOOL)measureCorners
 {
-  if (self.superview == nil) {
+  // A view outside the window (e.g. one being mounted into a detached parent) reports wrong
+  // insets. Its layout callbacks measure it again once it is in the window.
+  if (self.superview == nil || self.window == nil) {
     return;
   }
   // This gets called before the view size is set by react-native so
