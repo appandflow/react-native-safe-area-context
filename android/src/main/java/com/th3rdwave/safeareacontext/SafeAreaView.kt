@@ -2,12 +2,14 @@ package com.th3rdwave.safeareacontext
 
 import android.content.Context
 import android.os.Build
+import android.os.SystemClock
 import android.view.RoundedCorner
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewTreeObserver
 import android.view.WindowInsets
 import com.facebook.react.bridge.Arguments
+import com.facebook.react.uimanager.PixelUtil
 import com.facebook.react.uimanager.StateWrapper
 import com.facebook.react.uimanager.UIManagerModule
 import com.facebook.react.views.view.ReactViewGroup
@@ -23,6 +25,8 @@ class SafeAreaView(context: Context?) :
   private var mLastCorners: List<RoundedCorner?>? = null
   private var mProviderView: View? = null
   private var mStateWrapper: StateWrapper? = null
+  private var mPendingStateInsets: EdgeInsets? = null
+  private var mDrawHeldSince = NOT_HELD
   private val mDispatchedInsets = DispatchedWindowInsets()
 
   fun getStateWrapper(): StateWrapper? {
@@ -49,6 +53,13 @@ class SafeAreaView(context: Context?) :
         val map = Arguments.createMap()
         map.putMap("insets", edgeInsetsToJsMap(insets))
         stateWrapper.updateState(map)
+        mPendingStateInsets =
+            EdgeInsets(
+                top = PixelUtil.toDIPFromPixel(insets.top),
+                right = PixelUtil.toDIPFromPixel(insets.right),
+                bottom = PixelUtil.toDIPFromPixel(insets.bottom),
+                left = PixelUtil.toDIPFromPixel(insets.left),
+            )
       } else {
         val localData = SafeAreaViewLocalData(insets = insets, mode = mMode, edges = edges)
         val reactContext = getReactContext(this)
@@ -134,6 +145,8 @@ class SafeAreaView(context: Context?) :
     mProviderView?.viewTreeObserver?.removeOnPreDrawListener(this)
     mProviderView = null
     mLastSafeAreaInsets = null
+    mPendingStateInsets = null
+    mDrawHeldSince = NOT_HELD
     mDispatchedInsets.clear()
   }
 
@@ -142,11 +155,50 @@ class SafeAreaView(context: Context?) :
     return super.dispatchApplyWindowInsets(insets)
   }
 
+  // Fabric commits the state update asynchronously, so the padding reaches the view in a later
+  // mount. Until then the view is laid out with the previous insets.
+  private fun isWaitingForState(): Boolean {
+    val pending = mPendingStateInsets ?: return false
+    val state = mStateWrapper?.stateData?.getMap("insets")
+    if (
+        state != null &&
+            EdgeInsets(
+                top = state.getDouble("top").toFloat(),
+                right = state.getDouble("right").toFloat(),
+                bottom = state.getDouble("bottom").toFloat(),
+                left = state.getDouble("left").toFloat(),
+            ) == pending
+    ) {
+      mPendingStateInsets = null
+      return false
+    }
+    return true
+  }
+
   override fun onPreDraw(): Boolean {
     val didUpdate = maybeUpdateInsets()
     if (didUpdate) {
       requestLayout()
     }
-    return !didUpdate
+    if (!didUpdate && !isWaitingForState()) {
+      mDrawHeldSince = NOT_HELD
+      return true
+    }
+    // Skip draws until the new insets are mounted, but never for longer than MAX_DRAW_HOLD_MS, so
+    // a busy JS thread cannot stop the window from drawing.
+    val now = SystemClock.uptimeMillis()
+    if (mDrawHeldSince == NOT_HELD) {
+      mDrawHeldSince = now
+    } else if (now - mDrawHeldSince >= MAX_DRAW_HOLD_MS) {
+      mPendingStateInsets = null
+      mDrawHeldSince = NOT_HELD
+      return true
+    }
+    return false
+  }
+
+  private companion object {
+    const val NOT_HELD = -1L
+    const val MAX_DRAW_HOLD_MS = 100L
   }
 }
