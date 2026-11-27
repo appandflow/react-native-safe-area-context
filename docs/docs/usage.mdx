@@ -21,3 +21,10 @@ Consumers are components and hooks that allow using inset values provided by the
 ### Keyboard handling
 
 The safe area insets do not include the software keyboard. It is recommended to use [react-native-keyboard-controller](https://github.com/kirillzyusko/react-native-keyboard-controller) to handle those.
+
+#### Android `windowSoftInputMode`
+
+The [`windowSoftInputMode`](https://developer.android.com/guide/topics/manifest/activity-element#wsoft) of your activity in `AndroidManifest.xml` does not change the insets, the keyboard is never part of them. It can change the size of the `SafeAreaProvider`, which is reported by [useSafeAreaFrame](/api/use-safe-area-frame):
+
+- When the app is not drawn edge-to-edge, `adjustResize` shrinks the window while the keyboard is open, so the provider frame gets shorter.
+- When the app is drawn edge-to-edge, `adjustResize` does not resize the window. The provider keeps its full height and the keyboard covers its bottom part. Android 15 and newer draw apps that target SDK 35 or higher edge-to-edge.
